@@ -1,0 +1,3 @@
+{{!-- QuickBooks CSV Export Template --}}
+Date,Description,Amount,Account,Memo,Name,Class{{#each data}}
+{{formatDate transactionDate "MM/DD/YYYY"}},"{{description}}",{{amount}},"{{category.name}}","{{#if receiptNumber}}Receipt: {{receiptNumber}}{{/if}}","{{#if merchantName}}{{merchantName}}{{else}}{{user.firstName}} {{user.lastName}}{{/if}}","{{#if project.name}}{{project.name}}{{/if}}"{{/each}} 

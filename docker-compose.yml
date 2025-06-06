@@ -1,0 +1,412 @@
+# ========================================
+# ExpenseFlow Pro - Multi-Tenant Production Stack
+# ========================================
+
+version: '3.8'
+
+services:
+  # ========================================
+  # Core Application Services
+  # ========================================
+  
+  # ExpenseFlow Pro API Server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: expenseflow-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      
+      # Database Configuration
+      DATABASE_URL: postgresql://expenseflow:${DB_PASSWORD}@postgres:5432/expenseflow_pro?schema=public
+      
+      # Redis Configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_EXPIRES_IN: 7d
+      JWT_REFRESH_EXPIRES_IN: 30d
+      
+      # Security Configuration
+      BCRYPT_SALT_ROUNDS: 12
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 100
+      MAX_LOGIN_ATTEMPTS: 5
+      LOCKOUT_DURATION_MINUTES: 30
+      
+      # File Storage Configuration
+      UPLOAD_DIR: /app/uploads
+      MAX_FILE_SIZE: 52428800
+      ALLOWED_FILE_TYPES: image/jpeg,image/png,image/webp,application/pdf
+      
+      # OCR/AI Configuration
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: llava:latest
+      OCR_CONFIDENCE_THRESHOLD: 0.8
+      
+      # Queue Configuration
+      BULL_QUEUE_PREFIX: expenseflow
+      QUEUE_CONCURRENCY: 3
+      QUEUE_MAX_ATTEMPTS: 3
+      QUEUE_BACKOFF_DELAY: 5000
+      
+      # Email Configuration
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      
+      # Multi-Tenant Configuration
+      DEFAULT_TENANT_SLUG: default
+      TENANT_ISOLATION_ENABLED: true
+      
+      # Monitoring
+      LOG_LEVEL: info
+      SENTRY_DSN: ${SENTRY_DSN}
+      
+    volumes:
+      - uploads_data:/app/uploads
+      - logs_data:/app/logs
+      - ./locales:/app/locales:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - expenseflow-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ========================================
+  # Database Services
+  # ========================================
+  
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: expenseflow-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: expenseflow_pro
+      POSTGRES_USER: expenseflow
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    command: >
+      postgres
+      -c config_file=/etc/postgresql/postgresql.conf
+      -c log_statement=mod
+      -c log_destination=stderr
+      -c log_min_messages=warning
+      -c log_line_prefix='%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+    networks:
+      - expenseflow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U expenseflow -d expenseflow_pro"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache & Queue
+  redis:
+    image: redis:7-alpine
+    container_name: expenseflow-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --appendfsync everysec
+      --auto-aof-rewrite-percentage 100
+      --auto-aof-rewrite-min-size 64mb
+    volumes:
+      - redis_data:/data
+    networks:
+      - expenseflow-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================================
+  # AI/ML Services
+  # ========================================
+  
+  # Ollama LLaVA for OCR
+  ollama:
+    image: ollama/ollama:latest
+    container_name: expenseflow-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    environment:
+      OLLAMA_DEBUG: 0
+      OLLAMA_HOST: 0.0.0.0
+      OLLAMA_ORIGINS: "*"
+      OLLAMA_MODELS: /root/.ollama/models
+    volumes:
+      - ollama_data:/root/.ollama
+      - /dev/shm:/dev/shm
+    networks:
+      - expenseflow-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  # ========================================
+  # Object Storage
+  # ========================================
+  
+  # MinIO Object Storage
+  minio:
+    image: minio/minio:latest
+    container_name: expenseflow-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - expenseflow-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # ========================================
+  # Monitoring & Observability
+  # ========================================
+  
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: expenseflow-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - expenseflow-network
+
+  # Grafana Dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: expenseflow-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - expenseflow-network
+
+  # ========================================
+  # Load Balancer & Reverse Proxy
+  # ========================================
+  
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: expenseflow-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - api
+    networks:
+      - expenseflow-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ========================================
+  # Background Services
+  # ========================================
+  
+  # Queue Worker
+  queue-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: expenseflow-queue-worker
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      WORKER_MODE: true
+      
+      # Database Configuration
+      DATABASE_URL: postgresql://expenseflow:${DB_PASSWORD}@postgres:5432/expenseflow_pro?schema=public
+      
+      # Redis Configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      
+      # OCR/AI Configuration
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: llava:latest
+      
+      # Queue Configuration
+      BULL_QUEUE_PREFIX: expenseflow
+      QUEUE_CONCURRENCY: 5
+      QUEUE_MAX_ATTEMPTS: 3
+      
+      # File Storage
+      UPLOAD_DIR: /app/uploads
+      
+    volumes:
+      - uploads_data:/app/uploads
+      - logs_data:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - expenseflow-network
+    command: ["node", "src/workers/documentWorker.js"]
+
+  # Cron Jobs Scheduler
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: expenseflow-scheduler
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      SCHEDULER_MODE: true
+      
+      # Database Configuration
+      DATABASE_URL: postgresql://expenseflow:${DB_PASSWORD}@postgres:5432/expenseflow_pro?schema=public
+      
+      # Redis Configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      
+    volumes:
+      - logs_data:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - expenseflow-network
+    command: ["node", "src/workers/scheduler.js"]
+
+# ========================================
+# Volumes
+# ========================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  ollama_data:
+    driver: local
+  minio_data:
+    driver: local
+  uploads_data:
+    driver: local
+  logs_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  nginx_logs:
+    driver: local
+
+# ========================================
+# Networks
+# ========================================
+networks:
+  expenseflow-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 

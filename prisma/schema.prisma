@@ -1,0 +1,1637 @@
+// ========================================
+// ExpenseFlow Pro Database Schema - Multi-Tenant Architecture
+// ========================================
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// Multi-Tenant Core Models
+// ========================================
+
+model Tenant {
+  id        String   @id @default(cuid())
+  slug      String   @unique // URL-friendly identifier
+  name      String
+  domain    String?  @unique // Custom domain (optional)
+  
+  // Regional Configuration
+  region        String @default("eu-central") // eu-central, us-east, asia-pacific
+  timezone      String @default("Europe/Warsaw")
+  locale        String @default("pl-PL")
+  
+  // Subscription & Billing
+  subscriptionTier   String  @default("basic") // basic, premium, enterprise
+  subscriptionStatus String  @default("active") // active, suspended, cancelled
+  billingEmail       String?
+  maxUsers          Int     @default(10)
+  maxStorageGB      Int     @default(5)
+  
+  // Security Settings
+  allowedDomains    String[] // Email domains allowed to register
+  enforceSSO        Boolean  @default(false)
+  requireMFA        Boolean  @default(false)
+  sessionTimeout    Int      @default(480) // minutes
+  
+  // Data Encryption
+  encryptionKeyId   String? // Reference to encryption key in key management
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastActiveAt DateTime @default(now())
+  
+  // Relationships
+  companies Company[]
+  users     User[]
+  auditLogs AuditLog[]
+  
+  @@map("tenants")
+}
+
+// ========================================
+// Enhanced User Management
+// ========================================
+
+model User {
+  id        String   @id @default(cuid())
+  tenantId  String   // Multi-tenant isolation
+  email     String   
+  password  String
+  firstName String
+  lastName  String
+  avatar    String?
+  phone     String?
+  
+  // Security
+  isActive           Boolean   @default(true)
+  isVerified         Boolean   @default(false)
+  emailVerifiedAt    DateTime?
+  isMFAEnabled       Boolean   @default(false)
+  mfaSecret          String?   // Encrypted TOTP secret
+  lastLoginAt        DateTime?
+  lastLoginIP        String?
+  failedLoginAttempts Int      @default(0)
+  lockedUntil        DateTime?
+  passwordChangedAt  DateTime  @default(now())
+  
+  // Session Management
+  sessionTokens      String[]  // Active session tokens
+  refreshTokens      String[]  // Refresh tokens
+  
+  // Privacy & Compliance
+  dataRetentionConsent Boolean @default(false)
+  marketingConsent     Boolean @default(false)
+  gdprConsentAt        DateTime?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  tenant        Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  companies     CompanyUser[]
+  expenses      Expense[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  statementCorrections StatementCorrection[]
+  transactionCorrections TransactionCorrection[]
+  matchReviews  TransactionMatch[] @relation("MatchReviewer")
+  auditActions  MatchingAuditLog[] @relation("AuditUser")
+  generatedReports ReconciliationReport[] @relation("ReportGenerator")
+  
+  // Approval System Relationships
+  stepRecordsAsApprover ApprovalStepRecord[] @relation("StepApprover")
+  stepRecordsAsOriginal ApprovalStepRecord[] @relation("OriginalApprover")
+  stepRecordsAsDelegatedBy ApprovalStepRecord[] @relation("DelegatedBy")
+  delegationsAsDelegator ApprovalDelegation[] @relation("Delegator")
+  delegationsAsDelegatee ApprovalDelegation[] @relation("Delegatee")
+  approvalNotifications ApprovalNotification[] @relation("ApprovalNotificationUser")
+  approvalAudits ApprovalAuditRecord[] @relation("ApprovalAuditor")
+  bulkApprovals BulkApprovalBatch[] @relation("BulkApprover")
+  
+  // Export System Relationships
+  createdExportSchedules ExportSchedule[] @relation("ExportScheduleCreator")
+  createdExportTemplates ExportTemplate[] @relation("ExportTemplateCreator")
+  
+  @@unique([tenantId, email]) // Unique email per tenant
+  @@index([tenantId])
+  @@index([email])
+  @@index([lastLoginAt])
+  @@map("users")
+}
+
+model Company {
+  id          String  @id @default(cuid())
+  tenantId    String  // Multi-tenant isolation
+  name        String
+  description String?
+  logo        String?
+  website     String?
+  phone       String?
+  
+  // Address Information
+  address     String?
+  city        String?
+  state       String?
+  country     String  @default("Poland")
+  postalCode  String?
+  
+  // Tax Information
+  vatNumber   String?
+  taxId       String?
+  regonNumber String?
+  
+  // Multi-Currency Support
+  baseCurrency    String  @default("PLN")
+  supportedCurrencies String[] @default(["PLN", "EUR", "USD"])
+  
+  // Company Settings
+  isActive          Boolean @default(true)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  tenant            Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users             CompanyUser[]
+  expenses          Expense[]
+  documents         Document[]
+  projects          Project[]
+  customFormats     CustomFormat[]
+  exportSchedules   ExportSchedule[]
+  exportTemplates   ExportTemplate[]
+  approvalWorkflows ApprovalWorkflow[]
+  categories        ExpenseCategory[]
+  auditLogs         AuditLog[]
+  categorizationLearning CategorizationLearning[]
+  vendorCategories  VendorCategory[]
+  categoryKeywords  CategoryKeyword[]
+  bankStatements    BankStatement[]
+  bankTransactions  BankTransaction[]
+  transactionMatches TransactionMatch[]
+  matchingRules     MatchingRule[]
+  matchingAudits    MatchingAuditLog[]
+  reconciliationReports ReconciliationReport[]
+  matchingLearning  MatchingLearningData[]
+  currencies        Currency[]
+  
+  // Approval System Relationships
+  approvalInstances ApprovalInstance[]
+  approvalDelegations ApprovalDelegation[]
+  bulkApprovalBatches BulkApprovalBatch[]
+  
+  @@unique([tenantId, vatNumber]) // Unique VAT per tenant
+  @@index([tenantId])
+  @@index([vatNumber])
+  @@map("companies")
+}
+
+// ========================================
+// Currency Management
+// ========================================
+
+model Currency {
+  id          String  @id @default(cuid())
+  companyId   String
+  code        String  // ISO 4217 currency code (EUR, USD, PLN, etc.)
+  name        String  // Full currency name
+  symbol      String  // Currency symbol (€, $, zł, etc.)
+  
+  // Exchange Rate Configuration
+  isBaseCurrency Boolean @default(false)
+  exchangeRate   Decimal @default(1.0) @db.Decimal(10, 6)
+  lastUpdated    DateTime @default(now())
+  
+  // Display Configuration
+  decimalPlaces     Int     @default(2)
+  thousandSeparator String  @default(",")
+  decimalSeparator  String  @default(".")
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  company             Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expenses            Expense[]
+  bankTransactions    BankTransaction[]
+  exchangeRateHistory ExchangeRate[]
+  
+  @@unique([companyId, code])
+  @@index([companyId])
+  @@map("currencies")
+}
+
+model ExchangeRate {
+  id          String   @id @default(cuid())
+  currencyId  String
+  rate        Decimal  @db.Decimal(10, 6)
+  date        DateTime @default(now())
+  source      String   @default("manual") // manual, api, bank
+  
+  // Relationships
+  currency Currency @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+  
+  @@unique([currencyId, date])
+  @@index([date])
+  @@map("exchange_rates")
+}
+
+// ========================================
+// User Management
+// ========================================
+
+model CompanyUser {
+  id       String      @id @default(cuid())
+  userId   String
+  companyId String
+  role     CompanyRole @default(EMPLOYEE)
+  
+  // Access Control
+  permissions String[] // JSON array of permissions
+  isActive    Boolean  @default(true)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, companyId])
+  @@map("company_users")
+}
+
+enum CompanyRole {
+  ADMIN
+  MANAGER
+  ACCOUNTANT
+  EMPLOYEE
+}
+
+// ========================================
+// Document Management with Multi-Tenancy
+// ========================================
+
+model Document {
+  id          String      @id @default(cuid())
+  tenantId    String      // Multi-tenant isolation
+  companyId   String
+  fileName    String
+  originalName String
+  filePath    String      // Encrypted storage path
+  fileSize    Int
+  mimeType    String
+  fileHash    String      // Unique per tenant
+  
+  // Document Status
+  status           DocumentStatus @default(PENDING)
+  ocrProcessed     Boolean        @default(false)
+  extractedData    Json?          // OCR extracted data (encrypted)
+  confidenceScore  Float?
+  
+  // Processing Information
+  processedAt    DateTime?
+  processingTime Int?      // milliseconds
+  errorMessage   String?
+  
+  // Security & Compliance
+  encryptionKeyId String? // Reference to encryption key
+  accessLevel     String  @default("company") // company, department, user
+  isArchived      Boolean @default(false)
+  retentionUntil  DateTime? // Data retention policy
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expenses Expense[]
+  matches  TransactionMatch[]
+  
+  @@unique([tenantId, fileHash]) // Unique hash per tenant
+  @@index([tenantId])
+  @@index([companyId])
+  @@index([status])
+  @@map("documents")
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  FAILED
+  ARCHIVED
+}
+
+// ========================================
+// Expense Management
+// ========================================
+
+model Expense {
+  id          String  @id @default(cuid())
+  tenantId    String  // Multi-tenant isolation
+  companyId   String
+  userId      String
+  documentId  String?
+  categoryId  String?
+  projectId   String?
+  currencyId  String? // Reference to Currency model
+  
+  // Expense Details
+  title         String
+  description   String?
+  amount        Decimal  @db.Decimal(10, 2)
+  currency      String   @default("PLN") // Keep for backward compatibility
+  vatAmount     Decimal? @db.Decimal(10, 2)
+  
+  // Multi-Currency Support
+  originalAmount    Decimal? @db.Decimal(10, 2) // Original amount in original currency
+  originalCurrency  String?  // Original currency code
+  exchangeRate      Decimal? @db.Decimal(10, 6) // Exchange rate used
+  baseAmount        Decimal? @db.Decimal(10, 2) // Amount in company base currency
+  
+  // Transaction Information
+  transactionDate DateTime
+  merchantName    String?
+  merchantVatId   String?
+  receiptNumber   String?
+  
+  // Status and Approval
+  status      ExpenseStatus @default(DRAFT)
+  approvalId  String?
+  
+  // Reimbursement
+  isReimbursable Boolean @default(true)
+  reimbursedAt   DateTime?
+  reimbursedBy   String?
+  
+  // Compliance & Audit
+  taxInfo      Json?     // Tax-related information
+  receiptRequired Boolean @default(true)
+  businessPurpose String? // Required for compliance
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  company      Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document     Document?            @relation(fields: [documentId], references: [id])
+  category     ExpenseCategory?     @relation(fields: [categoryId], references: [id])
+  project      Project?             @relation(fields: [projectId], references: [id])
+  currencyRef  Currency?            @relation(fields: [currencyId], references: [id], onDelete: SetNull)
+  approval     ApprovalWorkflow?    @relation(fields: [approvalId], references: [id])
+  matchedTransactions BankTransaction[]
+  matches      TransactionMatch[]
+  approvalInstance ApprovalInstance?
+  
+  @@index([tenantId])
+  @@index([companyId])
+  @@index([userId])
+  @@index([status])
+  @@index([transactionDate])
+  @@map("expenses")
+}
+
+enum ExpenseStatus {
+  DRAFT
+  SUBMITTED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  REIMBURSED
+  ARCHIVED
+}
+
+model ExpenseCategory {
+  id          String  @id @default(cuid())
+  companyId   String
+  name        String
+  description String?
+  color       String? // Hex color code
+  isActive    Boolean @default(true)
+  
+  // Tax Information
+  defaultVatRate Decimal? @db.Decimal(5, 2)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expenses Expense[]
+  
+  @@unique([companyId, name])
+  @@map("expense_categories")
+}
+
+model Project {
+  id          String  @id @default(cuid())
+  companyId   String
+  name        String
+  description String?
+  code        String? // Project code/identifier
+  color       String? // Hex color code
+  isActive    Boolean @default(true)
+  
+  // Project Information
+  clientName    String?
+  startDate     DateTime?
+  endDate       DateTime?
+  budget        Decimal? @db.Decimal(12, 2)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expenses Expense[]
+  
+  @@unique([companyId, code])
+  @@unique([companyId, name])
+  @@map("projects")
+}
+
+model CustomFormat {
+  id           String   @id @default(cuid())
+  companyId    String
+  name         String
+  description  String?
+  bankName     String?
+  country      String?
+  fileTypes    String[] // JSON array of supported file types
+  parsingRules Json     // JSON object with parsing configuration
+  isActive     Boolean  @default(true)
+  version      String   @default("1.0")
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  @@unique([companyId, name])
+  @@map("custom_formats")
+}
+
+model ExportLog {
+  id         String   @id @default(cuid())
+  exportId   String
+  action     String   // STARTED, COMPLETED, FAILED, etc.
+  options    String   // JSON string of export options
+  result     String?  // JSON string of export result
+  timestamp  DateTime @default(now())
+  
+  @@index([exportId])
+  @@index([timestamp])
+  @@map("export_logs")
+}
+
+model ExportAudit {
+  id          String   @id @default(cuid())
+  exportId    String   @unique
+  format      String   // csv, excel, json, xml, pdf, custom
+  recordCount Int?
+  fileSize    Int?     // File size in bytes
+  fileName    String?
+  filePath    String?
+  options     String   // JSON string of export options
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  
+  @@index([format])
+  @@index([createdAt])
+  @@map("export_audits")
+}
+
+model ExportSchedule {
+  id           String   @id @default(cuid())
+  taskId       String   @unique
+  companyId    String
+  createdBy    String
+  name         String
+  description  String?
+  schedule     String   // Cron expression
+  exportConfig String   // JSON string of export configuration
+  enabled      Boolean  @default(true)
+  isActive     Boolean  @default(true)
+  timezone     String   @default("Europe/Warsaw")
+  
+  // Last execution info
+  lastRunAt    DateTime?
+  lastRunStatus String? // SUCCESS, FAILED
+  nextRunAt    DateTime?
+  
+  // Timestamps
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relationships
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  creator      User     @relation("ExportScheduleCreator", fields: [createdBy], references: [id])
+  
+  @@index([companyId, enabled])
+  @@index([nextRunAt])
+  @@map("export_schedules")
+}
+
+model ExportTemplate {
+  id             String   @id @default(cuid())
+  companyId      String
+  createdBy      String
+  name           String
+  description    String?
+  templateSource String   // Handlebars template source
+  outputFormat   String   // File extension for output
+  category       String?  // accounting, reporting, custom
+  isActive       Boolean  @default(true)
+  isGlobal       Boolean  @default(false) // Available to all companies
+  
+  // Usage statistics
+  usageCount     Int      @default(0)
+  lastUsedAt     DateTime?
+  
+  // Timestamps
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relationships
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  creator        User     @relation("ExportTemplateCreator", fields: [createdBy], references: [id])
+  
+  @@unique([companyId, name])
+  @@index([category, isActive])
+  @@map("export_templates")
+}
+
+// ========================================
+// Enhanced Approval Workflows System
+// ========================================
+
+model ApprovalWorkflow {
+  id        String           @id @default(cuid())
+  companyId String
+  name      String
+  description String?
+  
+  // Workflow Configuration
+  isActive     Boolean @default(true)
+  isDefault    Boolean @default(false)
+  priority     Int     @default(0)
+  
+  // Approval Rules and Conditions
+  amountThresholds   Json     // Array of amount thresholds with corresponding approval levels
+  categoryIds        String[] // Array of category IDs this workflow applies to
+  userIds            String[]? // Array of user IDs this workflow applies to (null = all users)
+  departmentIds      String[]? // Array of department IDs
+  
+  // Business Rules
+  businessRules      Json     // Complex conditional routing rules
+  autoApprovalLimit  Decimal? @db.Decimal(10, 2) // Auto-approve below this amount
+  requireReceipt     Boolean  @default(true)
+  allowSelfApproval  Boolean  @default(false)
+  
+  // Escalation Settings
+  escalationHours    Int?     // Hours before escalation
+  escalationEnabled  Boolean  @default(false)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  company          Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expenses         Expense[]
+  approvalSteps    ApprovalStep[]
+  approvalInstances ApprovalInstance[]
+  
+  @@unique([companyId, name])
+  @@index([companyId, isActive])
+  @@map("approval_workflows")
+}
+
+model ApprovalStep {
+  id         String @id @default(cuid())
+  workflowId String
+  stepOrder  Int
+  stepName   String
+  
+  // Step Configuration
+  approverType    ApproverType // SPECIFIC_USER, ROLE_BASED, MANAGER, DEPARTMENT_HEAD
+  approverIds     String[]     // Specific user IDs (for SPECIFIC_USER type)
+  approverRoles   CompanyRole[] // Required roles (for ROLE_BASED type)
+  requiredCount   Int          @default(1) // Number of approvals needed from this step
+  
+  // Step Conditions
+  conditions      Json?        // Conditions for this step to be active
+  skipConditions  Json?        // Conditions to skip this step
+  
+  // Step Behavior
+  allowParallel   Boolean      @default(false) // Allow parallel approval from multiple approvers
+  timeoutHours    Int?         // Hours before step times out
+  escalateOnTimeout Boolean    @default(false)
+  
+  // Delegation Settings
+  allowDelegation Boolean      @default(true)
+  delegationRules Json?        // Rules for who can delegate
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  workflow    ApprovalWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  stepRecords ApprovalStepRecord[]
+  
+  @@unique([workflowId, stepOrder])
+  @@index([workflowId, stepOrder])
+  @@map("approval_steps")
+}
+
+model ApprovalInstance {
+  id         String @id @default(cuid())
+  expenseId  String @unique
+  workflowId String
+  companyId  String
+  
+  // Instance Status
+  status           ApprovalInstanceStatus @default(PENDING)
+  currentStepOrder Int                    @default(1)
+  
+  // Timing
+  submittedAt      DateTime
+  completedAt      DateTime?
+  lastActionAt     DateTime              @default(now())
+  
+  // Escalation
+  escalationCount  Int                   @default(0)
+  isEscalated      Boolean               @default(false)
+  escalatedAt      DateTime?
+  escalatedBy      String?               // User who triggered escalation
+  
+  // Bulk Processing
+  batchId          String?               // For bulk approval tracking
+  
+  // Comments and Attachments
+  submissionNotes  String?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  expense    Expense         @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  workflow   ApprovalWorkflow @relation(fields: [workflowId], references: [id])
+  company    Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  stepRecords ApprovalStepRecord[]
+  notifications ApprovalNotification[]
+  auditRecords ApprovalAuditRecord[]
+  
+  @@index([companyId, status])
+  @@index([workflowId, status])
+  @@index([currentStepOrder])
+  @@index([batchId])
+  @@map("approval_instances")
+}
+
+model ApprovalStepRecord {
+  id         String @id @default(cuid())
+  instanceId String
+  stepId     String
+  stepOrder  Int
+  
+  // Approval Details
+  approverId   String
+  originalApproverId String? // Original approver if delegated
+  status       ApprovalStepStatus
+  decision     ApprovalDecision?
+  
+  // Comments and Feedback
+  comments     String?
+  privateNotes String? // Internal notes not visible to submitter
+  
+  // Timing
+  assignedAt   DateTime  @default(now())
+  actionTakenAt DateTime?
+  
+  // Delegation
+  isDelegated  Boolean   @default(false)
+  delegatedBy  String?   // Original approver who delegated
+  delegatedAt  DateTime?
+  delegationReason String?
+  
+  // Escalation
+  isEscalated  Boolean   @default(false)
+  escalatedBy  String?
+  escalatedAt  DateTime?
+  
+  // Bulk Processing
+  isBulkAction Boolean   @default(false)
+  bulkBatchId  String?
+  
+  // Metadata
+  metadata     Json?     // Additional step-specific data
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  instance     ApprovalInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  step         ApprovalStep     @relation(fields: [stepId], references: [id])
+  approver     User            @relation("StepApprover", fields: [approverId], references: [id])
+  originalApprover User?       @relation("OriginalApprover", fields: [originalApproverId], references: [id])
+  delegatedByUser  User?       @relation("DelegatedBy", fields: [delegatedBy], references: [id])
+  
+  @@index([instanceId, stepOrder])
+  @@index([approverId, status])
+  @@index([status, assignedAt])
+  @@index([bulkBatchId])
+  @@map("approval_step_records")
+}
+
+model ApprovalDelegation {
+  id         String @id @default(cuid())
+  companyId  String
+  delegatorId String
+  delegateeId String
+  
+  // Delegation Scope
+  isGlobal    Boolean      @default(false) // Applies to all expenses
+  workflowIds String[]?    // Specific workflows (if not global)
+  categoryIds String[]?    // Specific categories
+  amountLimit Decimal?     @db.Decimal(10, 2) // Maximum amount delegate can approve
+  
+  // Delegation Period
+  validFrom   DateTime
+  validTo     DateTime?    // null = indefinite
+  
+  // Status
+  isActive    Boolean      @default(true)
+  
+  // Reason and Notes
+  reason      String?
+  notes       String?
+  
+  // Auto-expiry
+  autoExpire  Boolean      @default(false)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  company    Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  delegator  User    @relation("Delegator", fields: [delegatorId], references: [id])
+  delegatee  User    @relation("Delegatee", fields: [delegateeId], references: [id])
+  
+  @@unique([delegatorId, delegateeId, validFrom])
+  @@index([companyId, isActive])
+  @@index([delegateeId, isActive])
+  @@index([validFrom, validTo])
+  @@map("approval_delegations")
+}
+
+model ApprovalNotification {
+  id         String @id @default(cuid())
+  instanceId String
+  userId     String
+  
+  // Notification Details
+  type       ApprovalNotificationType
+  title      String
+  message    String
+  
+  // Status
+  isRead     Boolean   @default(false)
+  readAt     DateTime?
+  isSent     Boolean   @default(false)
+  sentAt     DateTime?
+  
+  // Email Tracking
+  emailSent  Boolean   @default(false)
+  emailSentAt DateTime?
+  emailOpened Boolean  @default(false)
+  emailClickedAt DateTime?
+  
+  // Retry Logic
+  retryCount Int       @default(0)
+  lastRetryAt DateTime?
+  
+  // Metadata
+  metadata   Json?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  instance ApprovalInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  user     User             @relation("ApprovalNotificationUser", fields: [userId], references: [id])
+  
+  @@index([userId, isRead])
+  @@index([instanceId, type])
+  @@index([isSent, sentAt])
+  @@map("approval_notifications")
+}
+
+model ApprovalAuditRecord {
+  id         String @id @default(cuid())
+  instanceId String
+  userId     String?
+  
+  // Action Details
+  action     ApprovalAuditAction
+  fromStatus String?
+  toStatus   String?
+  
+  // Change Details
+  changes    Json?    // What was changed
+  oldValues  Json?    // Previous values
+  newValues  Json?    // New values
+  
+  // Context
+  reason     String?
+  comments   String?
+  stepOrder  Int?     // Which step this action relates to
+  
+  // System Information
+  ipAddress  String?
+  userAgent  String?
+  source     String?  // web, api, system, etc.
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  // Relationships
+  instance ApprovalInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  user     User?            @relation("ApprovalAuditor", fields: [userId], references: [id])
+  
+  @@index([instanceId, createdAt])
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@map("approval_audit_records")
+}
+
+model BulkApprovalBatch {
+  id         String @id @default(cuid())
+  companyId  String
+  approverId String
+  
+  // Batch Details
+  batchName  String?
+  totalCount Int
+  processedCount Int    @default(0)
+  approvedCount  Int    @default(0)
+  rejectedCount  Int    @default(0)
+  
+  // Status
+  status     BulkApprovalStatus @default(PROCESSING)
+  
+  // Processing
+  startedAt  DateTime  @default(now())
+  completedAt DateTime?
+  
+  // Results
+  results    Json?     // Detailed results for each expense
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  company  Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  approver User    @relation("BulkApprover", fields: [approverId], references: [id])
+  
+  @@index([companyId, approverId])
+  @@index([status, startedAt])
+  @@map("bulk_approval_batches")
+}
+
+// Enums for the approval system
+enum ApproverType {
+  SPECIFIC_USER
+  ROLE_BASED
+  MANAGER
+  DEPARTMENT_HEAD
+  AUTO_APPROVE
+  EXTERNAL
+}
+
+enum ApprovalInstanceStatus {
+  PENDING
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+  CANCELLED
+  ESCALATED
+  TIMED_OUT
+}
+
+enum ApprovalStepStatus {
+  PENDING
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+  DELEGATED
+  ESCALATED
+  SKIPPED
+  TIMED_OUT
+}
+
+enum ApprovalDecision {
+  APPROVE
+  REJECT
+  REQUEST_MORE_INFO
+  ESCALATE
+}
+
+enum ApprovalNotificationType {
+  APPROVAL_REQUEST
+  APPROVAL_REMINDER
+  APPROVAL_OVERDUE
+  APPROVED
+  REJECTED
+  ESCALATED
+  DELEGATED
+  REQUEST_MORE_INFO
+  BULK_APPROVAL_STARTED
+  BULK_APPROVAL_COMPLETED
+}
+
+enum ApprovalAuditAction {
+  SUBMITTED
+  ASSIGNED
+  APPROVED
+  REJECTED
+  DELEGATED
+  ESCALATED
+  CANCELLED
+  STEP_COMPLETED
+  WORKFLOW_COMPLETED
+  BULK_APPROVED
+  BULK_REJECTED
+  REMINDED
+  TIMED_OUT
+  RESUBMITTED
+}
+
+enum BulkApprovalStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// ========================================
+// Notifications & Audit
+// ========================================
+
+model Notification {
+  id      String           @id @default(cuid())
+  userId  String
+  title   String
+  message String
+  type    NotificationType @default(INFO)
+  
+  // Status
+  isRead    Boolean @default(false)
+  readAt    DateTime?
+  
+  // Metadata
+  metadata Json? // Additional data related to notification
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("notifications")
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  APPROVAL_REQUEST
+  EXPENSE_APPROVED
+  EXPENSE_REJECTED
+  DOCUMENT_PROCESSED
+}
+
+model AuditLog {
+  id       String    @id @default(cuid())
+  userId   String?
+  action   String    // CREATE, UPDATE, DELETE, etc.
+  resource String    // User, Expense, Document, etc.
+  
+  // Details
+  resourceId   String?
+  oldValues    Json?
+  newValues    Json?
+  ipAddress    String?
+  userAgent    String?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  // Relationships
+  user User? @relation(fields: [userId], references: [id])
+  
+  @@map("audit_logs")
+}
+
+// ========================================
+// ML Categorization System
+// ========================================
+
+model CategorizationLearning {
+  id           String    @id @default(cuid())
+  vendor       String?
+  description  String?
+  extractedText String?
+  amount       Decimal?  @db.Decimal(10, 2)
+  userCategory String
+  companyId    String
+  features     String?   // Processed features for ML
+  confidence   Float?    // Original prediction confidence
+  isCorrection Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relationships
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, userCategory])
+  @@index([vendor])
+  @@map("categorization_learning")
+}
+
+model VendorCategory {
+  id           String    @id @default(cuid())
+  vendorName   String
+  normalizedVendor String
+  category     String
+  companyId    String?   // null for global vendors
+  confidence   Float     @default(1.0)
+  usageCount   Int       @default(1)
+  lastUsed     DateTime  @default(now())
+  isVerified   Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relationships
+  company      Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([normalizedVendor, companyId])
+  @@index([normalizedVendor])
+  @@index([category])
+  @@map("vendor_categories")
+}
+
+model CategoryKeyword {
+  id           String    @id @default(cuid())
+  keyword      String
+  category     String
+  weight       Float     @default(1.0)
+  companyId    String?   // null for global keywords
+  usageCount   Int       @default(1)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relationships
+  company      Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([keyword, category, companyId])
+  @@index([keyword])
+  @@index([category])
+  @@map("category_keywords")
+}
+
+// ========================================
+// Bank Statement Processing System
+// ========================================
+
+model BankStatement {
+  id               String            @id @default(cuid())
+  companyId        String
+  fileName         String
+  originalName     String
+  filePath         String
+  fileSize         Int
+  mimeType         String
+  fileHash         String            @unique
+  
+  // Bank Information
+  bankName         String?
+  accountNumber    String?
+  accountName      String?
+  statementPeriod  String?           // "2024-01" for January 2024
+  currency         String            @default("USD")
+  
+  // Processing Status
+  status           BankStatementStatus @default(PENDING)
+  processed        Boolean           @default(false)
+  processingError  String?
+  
+  // Statement Metadata
+  openingBalance   Decimal?          @db.Decimal(15, 2)
+  closingBalance   Decimal?          @db.Decimal(15, 2)
+  totalCredits     Decimal?          @db.Decimal(15, 2)
+  totalDebits      Decimal?          @db.Decimal(15, 2)
+  transactionCount Int?
+  
+  // Processing Information
+  parsedFormat     String?           // CSV, XLSX, PDF
+  bankFormat       String?           // chase, bofa, hsbc, etc.
+  parsingRules     Json?             // Custom parsing configuration
+  duplicateFlags   Json?             // Duplicate detection results
+  
+  // Enhanced Processing Fields
+  formatId         String?           // Custom format configuration ID
+  processingMethod String?           // tabula, pdf2table, ocr, etc.
+  ocrConfidence    Float?            // OCR confidence score for image-based statements
+  ocrLanguage      String?           // OCR language used (eng, pol, eng+pol)
+  hasMultiCurrency Boolean           @default(false) // Contains multiple currencies
+  currencyRates    Json?             // Exchange rates used for conversion
+  originalCurrency String?           // Original statement currency before conversion
+  integritySha256  String?           // File integrity checksum
+  
+  // Timestamps
+  statementDate    DateTime?         // Statement generation date
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  processedAt      DateTime?
+
+  // Relationships
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  transactions     BankTransaction[]
+  correctionLogs   StatementCorrection[]
+
+  @@index([companyId, statementDate])
+  @@index([accountNumber])
+  @@index([status])
+  @@map("bank_statements")
+}
+
+enum BankStatementStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  FAILED
+  NEEDS_REVIEW
+  ARCHIVED
+}
+
+model BankTransaction {
+  id                String            @id @default(cuid())
+  tenantId          String            // Multi-tenant isolation
+  statementId       String
+  companyId         String
+  currencyId        String?           // Reference to Currency model
+  
+  // Transaction Identifiers
+  transactionId     String?           // Bank's transaction ID
+  referenceNumber   String?
+  checkNumber       String?
+  
+  // Transaction Details
+  date              DateTime
+  description       String
+  amount            Decimal           @db.Decimal(15, 2)
+  type              TransactionType   @default(DEBIT)
+  currency          String            @default("PLN") // Changed from USD to PLN
+  
+  // Multi-Currency Support
+  originalAmount    Decimal?          @db.Decimal(15, 2) // Original amount in original currency
+  originalCurrency  String?           // Original currency code
+  exchangeRate      Decimal?          @db.Decimal(10, 6) // Exchange rate used
+  baseAmount        Decimal?          @db.Decimal(15, 2) // Amount in company base currency
+  
+  // Additional Information
+  category          String?           // Auto-categorized
+  categoryConfidence Float?
+  merchant          String?           // Extracted merchant name
+  location          String?
+  
+  // Balance Information
+  runningBalance    Decimal?          @db.Decimal(15, 2)
+  
+  // Processing Metadata
+  originalData      Json              // Raw data from bank statement
+  parseConfidence   Float?            // Confidence in parsing accuracy
+  isDuplicate       Boolean           @default(false)
+  duplicateHash     String?           // For duplicate detection
+  
+  // Review and Correction
+  needsReview       Boolean           @default(false)
+  reviewReason      String?
+  isManuallyEdited  Boolean           @default(false)
+  
+  // Matching with Expenses
+  matchedExpenseId  String?
+  matchConfidence   Float?
+  matchStatus       MatchStatus       @default(UNMATCHED)
+  
+  // Timestamps
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  // Relationships
+  statement         BankStatement     @relation(fields: [statementId], references: [id], onDelete: Cascade)
+  company           Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  currencyRef       Currency?         @relation(fields: [currencyId], references: [id], onDelete: SetNull)
+  matchedExpense    Expense?          @relation(fields: [matchedExpenseId], references: [id])
+  corrections       TransactionCorrection[]
+  matches           TransactionMatch[]
+
+  @@unique([tenantId, duplicateHash]) // Unique duplicate hash per tenant
+  @@index([tenantId])
+  @@index([companyId, date])
+  @@index([duplicateHash])
+  @@index([transactionId])
+  @@index([matchStatus])
+  @@map("bank_transactions")
+}
+
+enum TransactionType {
+  DEBIT
+  CREDIT
+  FEE
+  INTEREST
+  TRANSFER
+  ADJUSTMENT
+}
+
+enum MatchStatus {
+  UNMATCHED
+  AUTO_MATCHED
+  MANUALLY_MATCHED
+  REJECTED
+  PENDING_REVIEW
+}
+
+model StatementCorrection {
+  id            String        @id @default(cuid())
+  statementId   String
+  userId        String
+  
+  // Correction Details
+  fieldName     String        // What was corrected
+  oldValue      String?       // Original value
+  newValue      String        // Corrected value
+  reason        String?       // Why it was corrected
+  confidence    Float?        // User's confidence in correction
+  
+  // Timestamps
+  createdAt     DateTime      @default(now())
+  
+  // Relationships
+  statement     BankStatement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id])
+
+  @@index([statementId])
+  @@map("statement_corrections")
+}
+
+model TransactionCorrection {
+  id            String          @id @default(cuid())
+  transactionId String
+  userId        String
+  
+  // Correction Details
+  fieldName     String          // What was corrected
+  oldValue      String?         // Original value
+  newValue      String          // Corrected value
+  reason        String?         // Why it was corrected
+  confidence    Float?          // User's confidence in correction
+  
+  // Timestamps
+  createdAt     DateTime        @default(now())
+  
+  // Relationships
+  transaction   BankTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  user          User            @relation(fields: [userId], references: [id])
+
+  @@index([transactionId])
+  @@map("transaction_corrections")
+}
+
+model BankFormat {
+  id            String    @id @default(cuid())
+  bankName      String
+  formatName    String    // chase_csv, bofa_xlsx, etc.
+  formatType    String    // CSV, XLSX, PDF
+  
+  // Format Configuration
+  fieldMappings Json      // Column mappings for parsing
+  dateFormats   String[]  // Supported date formats
+  amountFormat  String?   // Currency format pattern
+  encoding      String?   // File encoding (UTF-8, etc.)
+  
+  // Processing Rules
+  headerRows    Int       @default(1)
+  skipRows      Int       @default(0)
+  delimiter     String?   // For CSV files
+  sheetName     String?   // For Excel files
+  
+  // Validation Rules
+  requiredFields String[] // Must-have fields
+  validationRules Json?   // Custom validation logic
+  
+  // Usage Statistics
+  usageCount    Int       @default(0)
+  isActive      Boolean   @default(true)
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([bankName, formatName])
+  @@index([bankName])
+  @@index([formatType])
+  @@map("bank_formats")
+}
+
+// ========================================
+// Transaction Matching System
+// ========================================
+
+model TransactionMatch {
+  id                 String                @id @default(cuid())
+  companyId          String
+  transactionId      String
+  expenseId          String?
+  documentId         String?
+  
+  // Matching Details
+  matchType          MatchType             @default(FUZZY)
+  matchStrategy      String                // exact, fuzzy, pattern-based, ml-assisted
+  confidenceScore    Float                 // 0.0 to 1.0
+  matchedFields      Json                  // Which fields matched and their scores
+  
+  // Matching Criteria Scores
+  amountScore        Float?                // Amount similarity score
+  dateScore          Float?                // Date proximity score
+  vendorScore        Float?                // Vendor name similarity score
+  aggregateScore     Float                 // Weighted overall score
+  
+  // Status and Review
+  status             MatchingStatus        @default(PENDING)
+  reviewedBy         String?
+  reviewedAt         DateTime?
+  rejectionReason    String?
+  userFeedback       Json?                 // User corrections and confirmations
+  
+  // Split Transaction Support
+  isPartialMatch     Boolean               @default(false)
+  splitAmount        Decimal?              @db.Decimal(15, 2)
+  relatedMatchIds    String[]              // Related split matches
+  
+  // Machine Learning Features
+  featureVector      Json?                 // ML features used for matching
+  modelVersion       String?               // Version of ML model used
+  trainingData       Boolean               @default(false) // Is this used for training
+  
+  // Timestamps
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  
+  // Relationships
+  company            Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  transaction        BankTransaction       @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  expense            Expense?              @relation(fields: [expenseId], references: [id])
+  document           Document?             @relation(fields: [documentId], references: [id])
+  reviewedByUser     User?                 @relation("MatchReviewer", fields: [reviewedBy], references: [id])
+  auditLogs          MatchingAuditLog[]
+  
+  @@unique([transactionId, expenseId])
+  @@index([companyId, status])
+  @@index([confidenceScore])
+  @@index([matchType, matchStrategy])
+  @@map("transaction_matches")
+}
+
+enum MatchType {
+  EXACT
+  FUZZY
+  PATTERN
+  ML_ASSISTED
+  MANUAL
+}
+
+enum MatchingStatus {
+  PENDING
+  AUTO_APPROVED
+  MANUAL_REVIEW
+  APPROVED
+  REJECTED
+  SPLIT
+}
+
+model MatchingRule {
+  id                 String               @id @default(cuid())
+  companyId          String
+  name               String
+  description        String?
+  
+  // Rule Configuration
+  isActive           Boolean              @default(true)
+  priority           Int                  @default(0)
+  matchStrategy      String               // exact, fuzzy, pattern-based
+  
+  // Matching Criteria
+  amountTolerance    Float?               // Percentage tolerance for amount
+  dateTolerance      Int?                 // Days tolerance for date
+  vendorThreshold    Float?               // Vendor name similarity threshold
+  
+  // Weight Configuration
+  amountWeight       Float                @default(0.4)
+  dateWeight         Float                @default(0.3)
+  vendorWeight       Float                @default(0.3)
+  
+  // Conditions
+  conditions         Json                 // Complex matching conditions
+  autoApprovalLimit  Float?               // Auto-approve above this confidence
+  reviewThreshold    Float?               // Require review below this confidence
+  
+  // Usage Statistics
+  usageCount         Int                  @default(0)
+  successRate        Float?               // Success rate of this rule
+  
+  // Timestamps
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  
+  // Relationships
+  company            Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  learningData       MatchingLearningData[]
+  
+  @@unique([companyId, name])
+  @@index([companyId, isActive])
+  @@index([priority])
+  @@map("matching_rules")
+}
+
+model MatchingAuditLog {
+  id                 String               @id @default(cuid())
+  matchId            String
+  companyId          String
+  userId             String?
+  
+  // Action Details
+  action             MatchingAction
+  previousStatus     MatchingStatus?
+  newStatus          MatchingStatus?
+  
+  // Change Details
+  changes            Json?                // What was changed
+  reason             String?              // Reason for the action
+  confidence         Float?               // Confidence before/after
+  
+  // Learning Data
+  userCorrection     Json?                // User corrections for ML learning
+  feedback           String?              // User feedback
+  
+  // Timestamps
+  createdAt          DateTime             @default(now())
+  
+  // Relationships
+  match              TransactionMatch     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  company            Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user               User?                @relation("AuditUser", fields: [userId], references: [id])
+  
+  @@index([matchId])
+  @@index([companyId, createdAt])
+  @@index([action])
+  @@map("matching_audit_logs")
+}
+
+enum MatchingAction {
+  CREATED
+  AUTO_MATCHED
+  MANUALLY_MATCHED
+  REJECTED
+  SPLIT
+  APPROVED
+  REVIEWED
+  CORRECTED
+  RETRAINED
+}
+
+model ReconciliationReport {
+  id                    String               @id @default(cuid())
+  companyId             String
+  generatedBy           String
+  
+  // Report Period
+  periodStart           DateTime
+  periodEnd             DateTime
+  reportType            ReportType           @default(MONTHLY)
+  
+  // Statistics
+  totalTransactions     Int
+  totalExpenses         Int
+  matchedCount          Int
+  unmatchedTransactions Int
+  unmatchedExpenses     Int
+  partialMatches        Int
+  
+  // Amounts
+  totalTransactionAmount Decimal             @db.Decimal(15, 2)
+  totalExpenseAmount     Decimal             @db.Decimal(15, 2)
+  matchedAmount          Decimal             @db.Decimal(15, 2)
+  unmatchedAmount        Decimal             @db.Decimal(15, 2)
+  
+  // Performance Metrics
+  autoReconciliationRate Float              // Percentage auto-reconciled
+  averageConfidenceScore Float              // Average confidence of matches
+  processingTime         Int?                // Time to generate report (ms)
+  
+  // Report Data
+  reportData            Json                 // Detailed report data
+  unmatchedItems        Json?                // List of unmatched items
+  
+  // File Information
+  reportPath            String?              // Path to generated report file
+  reportFormat          String?              // PDF, Excel, CSV
+  
+  // Timestamps
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  
+  // Relationships
+  company               Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  generatedByUser       User                 @relation("ReportGenerator", fields: [generatedBy], references: [id])
+  
+  @@index([companyId, periodStart, periodEnd])
+  @@index([reportType])
+  @@map("reconciliation_reports")
+}
+
+enum ReportType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  CUSTOM
+}
+
+model MatchingLearningData {
+  id                    String               @id @default(cuid())
+  companyId             String
+  
+  // Learning Instance
+  transactionData       Json                 // Anonymized transaction features
+  expenseData           Json                 // Anonymized expense features
+  matchOutcome          Boolean              // True if confirmed match
+  userAction            MatchingAction
+  
+  // Features
+  featureVector         Json                 // ML feature vector
+  confidence            Float                // System confidence
+  userConfidence        Float?               // User confidence rating
+  
+  // Context
+  matchStrategy         String               // Which strategy was used
+  ruleId                String?              // Which rule was applied
+  
+  // Metadata
+  isTrainingData        Boolean              @default(true)
+  isValidationData      Boolean              @default(false)
+  modelVersion          String?              // Model version when created
+  
+  // Timestamps
+  createdAt             DateTime             @default(now())
+  
+  // Relationships
+  company               Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  rule                  MatchingRule?        @relation(fields: [ruleId], references: [id])
+  
+  @@index([companyId, matchOutcome])
+  @@index([matchStrategy])
+  @@index([isTrainingData])
+  @@map("matching_learning_data")
+} 

@@ -1,0 +1,29 @@
+{{!-- Sage XML Export Template --}}
+<?xml version="1.0" encoding="UTF-8"?>
+<ImportData>
+  <Header>
+    <ExportDate>{{formatDate metadata.timestamp "YYYY-MM-DD"}}</ExportDate>
+    <RecordCount>{{metadata.recordCount}}</RecordCount>
+    <Company>ExpenseFlow Pro</Company>
+  </Header>
+  <Transactions>
+    {{#each data}}
+    <Transaction>
+      <TransactionDate>{{formatDate transactionDate "YYYY-MM-DD"}}</TransactionDate>
+      <Reference>{{#if receiptNumber}}{{receiptNumber}}{{else}}{{id}}{{/if}}</Reference>
+      <Description>{{description}}</Description>
+      <NetAmount>{{amount}}</NetAmount>
+      {{#if vatAmount}}
+      <TaxAmount>{{vatAmount}}</TaxAmount>
+      <GrossAmount>{{#math amount "+" vatAmount}}{{/math}}</GrossAmount>
+      {{else}}
+      <TaxAmount>0.00</TaxAmount>
+      <GrossAmount>{{amount}}</GrossAmount>
+      {{/if}}
+      <NominalCode>{{#if category.code}}{{category.code}}{{else}}7500{{/if}}</NominalCode>
+      <Department>{{#if project.code}}{{project.code}}{{/if}}</Department>
+      <Supplier>{{#if merchantName}}{{merchantName}}{{/if}}</Supplier>
+    </Transaction>
+    {{/each}}
+  </Transactions>
+</ImportData> 

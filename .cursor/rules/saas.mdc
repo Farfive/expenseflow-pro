@@ -1,0 +1,112 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Absolutely! Here are the rules and guidelines for your OCR/AI system, specifically for Ollama LLaVA in your "Document-First, Web-Only" ExpenseFlow Pro project. This outlines what it needs to adhere to, what to pay attention to, and tasks for helping with the build.
+
+Rules and Guidelines for ExpenseFlow Pro's OCR/AI (Ollama LLaVA)
+I. Core Principles for the AI System
+Accuracy and Precision: The primary goal is to extract data with the highest possible accuracy. Aim for 95%+ accuracy on key fields (amount, date, merchant, NIP/VAT ID, bank account number) for clear, readable documents.
+Robustness to Variations: The system must handle a wide variety of receipt and invoice formats (different layouts, fonts, sizes) common in Poland and later CEE.
+Speed and Efficiency: Processing time per document should be minimal, ideally under 10 seconds from upload to data extraction.
+Security and Privacy-First: As a locally run model (via Ollama), ensure that no sensitive document data leaves the designated processing environment. Adhere strictly to GDPR and local data protection regulations.
+Explainability (for Human-in-the-Loop): While the model's internal workings don't need to be fully transparent, its outputs should be clear enough for a human reviewer to quickly understand and correct any errors.
+II. What the AI System Must Adhere To (Technical Constraints & Requirements)
+Input Formats:
+Images: JPG, PNG (for photos of receipts/invoices).
+PDFs: Both text-based and scanned image-based PDFs (for invoices, bank statements).
+Output Format:
+Structured JSON: Extracted data must be presented in a consistent, predefined JSON schema.
+Example for a receipt:
+JSON
+
+{
+  "document_type": "receipt",
+  "total_amount": 123.45,
+  "currency": "PLN",
+  "transaction_date": "YYYY-MM-DD",
+  "merchant_name": "Nazwa Sklepu Sp. z o.o.",
+  "nip_number": "1234567890",
+  "vat_amount": 23.45,
+  "items": [
+    {"description": "Item A", "quantity": 1, "price": 10.00},
+    {"description": "Item B", "quantity": 1, "price": 90.00}
+  ]
+}
+Data Extraction Priorities:
+Mandatory fields (always attempt to extract):
+Document Type (Receipt, Invoice, Bank Statement)
+Total Amount
+Currency
+Transaction Date / Issue Date
+Merchant Name / Company Name
+High-priority fields (extract if present):
+VAT Amount
+NIP / VAT ID
+Bank Account Number (from invoices for payments, or from bank statements)
+Invoice Number
+Category (initial suggestion based on merchant/keywords)
+Medium-priority fields (extract if possible/relevant):
+Line items (description, quantity, price for detailed receipts/invoices)
+Employee Name (if specified on document)
+Payment method (cash, card)
+Handling Ambiguity & Confidence Scores:
+The system should ideally provide a confidence score for each extracted field.
+If confidence is below a certain threshold (e.g., 80%), or if a mandatory field is missing/unclear, it should flag the document for human review in the Exception Handling queue.
+Language Support: Primarily Polish, with consideration for English, Czech, Slovak, German in future expansion.
+III. What the AI System Needs to Pay Attention To (Key Considerations)
+Visual Quality:
+Lighting: Handle receipts taken in various lighting conditions (dark, bright).
+Distortion: Correct for perspective distortion, rotation, and crumpled receipts.
+Resolution: Process images from different phone cameras, ranging from low to high resolution.
+Document Layout and Variety:
+Polish Specifics: Understand common Polish receipt/invoice layouts, tax IDs, and terminology (e.g., "PARAGON FISKALNY", "FAKTURA VAT").
+Table Extraction: Be proficient in extracting data from structured tables, especially for bank statements (even scanned PDFs). This might require combining LLaVA with specialized table parsing libraries.
+Handwriting: While challenging, recognize common handwritten elements where applicable (e.g., tips on restaurant receipts), but prioritize printed text.
+Numerical Accuracy:
+Decimal Separators: Correctly parse numbers using comma (,) or dot (.) as decimal separators.
+Thousands Separators: Ignore or correctly parse thousands separators.
+Currency Symbols: Distinguish between different currency symbols and their positions.
+Date Parsing:
+Handle various date formats (DD.MM.YYYY, YYYY-MM-DD, DD/MM/YY, etc.).
+Identify the correct date when multiple dates are present (e.g., issue date vs. due date on an invoice).
+Merchant Name Recognition:
+Identify the primary merchant name, often distinct from other text on the document.
+Handle abbreviations, legal entity suffixes (Sp. z o.o., S.A.), and variations.
+Edge Cases and Errors:
+Missing Information: Gracefully handle documents where key fields are missing or unreadable.
+Duplicates: Avoid processing the same document multiple times.
+Irrelevant Text: Filter out promotional messages, legal disclaimers, or other irrelevant text.
+IV. Tasks for Helping Build the AI System (Product Owner Perspective for Dev Team)
+These are tasks that the Product Owner will prioritize and validate, but the Dev/ML team will execute:
+
+Develop Ollama LLaVA Integration:
+Set up and optimize a local Ollama LLaVA instance.
+Create API endpoints for sending images/PDFs to LLaVA and receiving structured JSON output.
+Experiment with different LLaVA models (e.g., 7B, 13B, or fine-tuned versions if available) to find the optimal balance of accuracy and performance.
+Prompt Engineering for Data Extraction:
+Iteratively design and refine prompts for LLaVA to accurately extract all required fields from various document types (receipts, invoices, bank statements).
+Develop error handling and retry mechanisms if LLaVA output is malformed.
+Implement Document Pre-processing:
+Develop image processing pipelines (e.g., using OpenCV) to enhance document quality before sending to LLaVA (e.g., de-skewing, contrast adjustment, noise reduction, cropping to relevant area).
+Build a Specialized Bank Statement Parser (for PDF tables):
+Integrate and configure open-source libraries like Tabula or PDFPlumber to extract tabular data from PDF bank statements.
+Develop robust parsing logic to map extracted table columns to standardized transaction fields (date, amount, description).
+Develop "Human-in-the-Loop" (HITL) Verification Interface:
+Create a user-friendly interface where extracted data from documents is displayed alongside the original image/PDF for quick visual verification.
+Enable easy correction of fields by accounting personnel. Each correction should be logged for future model training/improvement.
+Implement Rule-Based Smart Matching Algorithms:
+Develop the core matching logic:
+Exact Match: Amount, Date (within +/- 1 day), and Merchant Name (exact string or high similarity score).
+Fuzzy Match: Amount (within +/- 2% tolerance), Date (within +/- 3 days), and some merchant name similarity.
+Merchant-Only Match: Prioritize if amount/date is close, but merchant name is highly similar.
+Implement logic to handle multiple potential matches and assign confidence scores.
+Ensure the matching logic is configurable and can be adjusted based on feedback.
+Data Validation and Error Handling:
+Implement automatic validation rules (e.g., check if NIP has correct format, if total amount equals sum of items + VAT).
+Define clear error messages for discrepancies or failed extractions.
+Performance Monitoring for AI:
+Set up monitoring tools to track OCR accuracy rates, processing times, and rates of documents requiring human intervention.
+
+Use this data to identify areas for model improvement or prompt refinement.

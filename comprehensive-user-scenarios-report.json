@@ -1,0 +1,1040 @@
+{
+  "testSession": {
+    "startTime": "2025-06-06T09:24:04.599Z",
+    "totalTests": 5,
+    "passedTests": 5,
+    "failedTests": 0,
+    "scenarios": [
+      {
+        "id": "SCENARIO_1",
+        "title": "Complete Employee Expense Submission & Approval Workflow",
+        "user": {
+          "name": "David Kim",
+          "email": "david.kim@techcorp.com",
+          "role": "Software Engineer",
+          "department": "Engineering",
+          "company": "TechCorp Solutions"
+        },
+        "startTime": "2025-06-06T09:24:04.602Z",
+        "steps": [
+          {
+            "name": "User Login",
+            "startTime": "2025-06-06T09:24:04.603Z",
+            "status": "error",
+            "error": "read ECONNRESET",
+            "endTime": "2025-06-06T09:24:09.730Z",
+            "duration": 5127
+          },
+          {
+            "name": "Navigate to Expenses Dashboard",
+            "startTime": "2025-06-06T09:24:10.233Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:10.238Z",
+            "duration": 5
+          },
+          {
+            "name": "Click New Expense Button",
+            "startTime": "2025-06-06T09:24:10.749Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:10.753Z",
+            "duration": 4
+          },
+          {
+            "name": "Upload Marriott Downtown Hotel Receipt",
+            "startTime": "2025-06-06T09:24:11.258Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:11.263Z",
+            "duration": 5
+          },
+          {
+            "name": "OCR Processing - Marriott Downtown Hotel",
+            "startTime": "2025-06-06T09:24:11.772Z",
+            "status": "passed",
+            "endTime": "2025-06-06T09:24:12.779Z",
+            "duration": 1007
+          },
+          {
+            "name": "Upload American Airlines Receipt",
+            "startTime": "2025-06-06T09:24:13.279Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:13.284Z",
+            "duration": 5
+          },
+          {
+            "name": "OCR Processing - American Airlines",
+            "startTime": "2025-06-06T09:24:13.789Z",
+            "status": "passed",
+            "endTime": "2025-06-06T09:24:14.802Z",
+            "duration": 1013
+          },
+          {
+            "name": "Upload The Capital Grille Receipt",
+            "startTime": "2025-06-06T09:24:15.301Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:15.306Z",
+            "duration": 5
+          },
+          {
+            "name": "OCR Processing - The Capital Grille",
+            "startTime": "2025-06-06T09:24:15.819Z",
+            "status": "passed",
+            "endTime": "2025-06-06T09:24:16.832Z",
+            "duration": 1013
+          },
+          {
+            "name": "Auto-Categorization Processing",
+            "startTime": "2025-06-06T09:24:17.342Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:17.346Z",
+            "duration": 4
+          },
+          {
+            "name": "Fill Expense Form",
+            "startTime": "2025-06-06T09:24:17.857Z",
+            "status": "passed",
+            "endTime": "2025-06-06T09:24:17.858Z",
+            "duration": 1
+          },
+          {
+            "name": "Submit for Approval",
+            "startTime": "2025-06-06T09:24:18.373Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:18.377Z",
+            "duration": 4
+          },
+          {
+            "name": "Check Expense Status",
+            "startTime": "2025-06-06T09:24:18.882Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:18.885Z",
+            "duration": 3
+          },
+          {
+            "name": "Test Notification System",
+            "startTime": "2025-06-06T09:24:19.390Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:19.394Z",
+            "duration": 4
+          }
+        ],
+        "status": "completed",
+        "errors": [],
+        "endTime": "2025-06-06T09:24:19.905Z",
+        "duration": 15303
+      },
+      {
+        "id": "SCENARIO_2",
+        "title": "Manager Approval & Budget Oversight Dashboard",
+        "user": {
+          "name": "Jennifer Smith",
+          "email": "jennifer.smith@techcorp.com",
+          "role": "Engineering Manager",
+          "department": "Engineering",
+          "company": "TechCorp Solutions"
+        },
+        "startTime": "2025-06-06T09:24:19.907Z",
+        "steps": [
+          {
+            "name": "Manager Dashboard Login",
+            "startTime": "2025-06-06T09:24:19.907Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:19.911Z",
+            "duration": 4
+          },
+          {
+            "name": "Navigate to Approvals",
+            "startTime": "2025-06-06T09:24:20.423Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:20.427Z",
+            "duration": 4
+          },
+          {
+            "name": "Review Pending Submissions",
+            "startTime": "2025-06-06T09:24:20.933Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:20.937Z",
+            "duration": 4
+          },
+          {
+            "name": "Test Approval Button",
+            "startTime": "2025-06-06T09:24:21.447Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:21.451Z",
+            "duration": 4
+          },
+          {
+            "name": "Test Rejection Button",
+            "startTime": "2025-06-06T09:24:21.959Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:21.963Z",
+            "duration": 4
+          },
+          {
+            "name": "Add Approval Comments",
+            "startTime": "2025-06-06T09:24:22.476Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:22.481Z",
+            "duration": 5
+          },
+          {
+            "name": "Check Budget Analytics",
+            "startTime": "2025-06-06T09:24:22.990Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:22.994Z",
+            "duration": 4
+          },
+          {
+            "name": "View Team Spending Reports",
+            "startTime": "2025-06-06T09:24:23.497Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:23.501Z",
+            "duration": 4
+          },
+          {
+            "name": "Export Approval Reports",
+            "startTime": "2025-06-06T09:24:24.002Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:24.005Z",
+            "duration": 3
+          }
+        ],
+        "status": "completed",
+        "errors": [],
+        "endTime": "2025-06-06T09:24:24.513Z",
+        "duration": 4606
+      },
+      {
+        "id": "SCENARIO_3",
+        "title": "CFO Executive Analytics & Financial Reporting",
+        "user": {
+          "name": "Robert Chen",
+          "email": "robert.chen@techcorp.com",
+          "role": "CFO",
+          "department": "Finance",
+          "company": "TechCorp Solutions"
+        },
+        "startTime": "2025-06-06T09:24:24.514Z",
+        "steps": [
+          {
+            "name": "CFO Executive Dashboard Access",
+            "startTime": "2025-06-06T09:24:24.514Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:24.518Z",
+            "duration": 4
+          },
+          {
+            "name": "View Company-wide Analytics",
+            "startTime": "2025-06-06T09:24:25.024Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:25.028Z",
+            "duration": 4
+          },
+          {
+            "name": "Test Spending by Category Chart",
+            "startTime": "2025-06-06T09:24:25.537Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:25.542Z",
+            "duration": 5
+          },
+          {
+            "name": "Test Monthly Trend Chart",
+            "startTime": "2025-06-06T09:24:26.049Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:26.053Z",
+            "duration": 4
+          },
+          {
+            "name": "Test Department Comparison Chart",
+            "startTime": "2025-06-06T09:24:26.562Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:26.566Z",
+            "duration": 4
+          },
+          {
+            "name": "Generate Monthly Financial Report",
+            "startTime": "2025-06-06T09:24:27.081Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:27.084Z",
+            "duration": 3
+          },
+          {
+            "name": "Analyze Department Spending",
+            "startTime": "2025-06-06T09:24:27.585Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:27.590Z",
+            "duration": 5
+          },
+          {
+            "name": "Review Compliance Metrics",
+            "startTime": "2025-06-06T09:24:28.102Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:28.105Z",
+            "duration": 3
+          },
+          {
+            "name": "Test Excel Export",
+            "startTime": "2025-06-06T09:24:28.620Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:28.623Z",
+            "duration": 3
+          },
+          {
+            "name": "Check Predictive Analytics",
+            "startTime": "2025-06-06T09:24:29.134Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:29.146Z",
+            "duration": 12
+          },
+          {
+            "name": "Verify Audit Trail",
+            "startTime": "2025-06-06T09:24:29.651Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:29.654Z",
+            "duration": 3
+          }
+        ],
+        "status": "completed",
+        "errors": [],
+        "endTime": "2025-06-06T09:24:30.157Z",
+        "duration": 5643
+      },
+      {
+        "id": "SCENARIO_4",
+        "title": "Accountant Document Processing & Reconciliation",
+        "user": {
+          "name": "Maria Rodriguez",
+          "email": "maria.rodriguez@techcorp.com",
+          "role": "Senior Accountant",
+          "department": "Finance",
+          "company": "TechCorp Solutions"
+        },
+        "startTime": "2025-06-06T09:24:30.158Z",
+        "steps": [
+          {
+            "name": "Accounting Interface Login",
+            "startTime": "2025-06-06T09:24:30.159Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:30.162Z",
+            "duration": 3
+          },
+          {
+            "name": "Navigate to Document Processing",
+            "startTime": "2025-06-06T09:24:30.675Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:30.680Z",
+            "duration": 5
+          },
+          {
+            "name": "Bulk Document Upload",
+            "startTime": "2025-06-06T09:24:31.191Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:31.195Z",
+            "duration": 4
+          },
+          {
+            "name": "OCR Batch Processing",
+            "startTime": "2025-06-06T09:24:31.697Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:31.703Z",
+            "duration": 6
+          },
+          {
+            "name": "Review Auto-categorization",
+            "startTime": "2025-06-06T09:24:32.212Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:32.215Z",
+            "duration": 3
+          },
+          {
+            "name": "Manual Categorization Corrections",
+            "startTime": "2025-06-06T09:24:32.725Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:32.729Z",
+            "duration": 4
+          },
+          {
+            "name": "Transaction Matching Workflow",
+            "startTime": "2025-06-06T09:24:33.240Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:33.243Z",
+            "duration": 3
+          },
+          {
+            "name": "Bank Statement Reconciliation",
+            "startTime": "2025-06-06T09:24:33.757Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:33.762Z",
+            "duration": 5
+          },
+          {
+            "name": "Generate Accounting Reports",
+            "startTime": "2025-06-06T09:24:34.263Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:34.266Z",
+            "duration": 3
+          },
+          {
+            "name": "Export to QuickBooks",
+            "startTime": "2025-06-06T09:24:34.773Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:34.776Z",
+            "duration": 3
+          }
+        ],
+        "status": "completed",
+        "errors": [],
+        "endTime": "2025-06-06T09:24:35.276Z",
+        "duration": 5118
+      },
+      {
+        "id": "SCENARIO_5",
+        "title": "Sales Team Travel & Entertainment Expenses",
+        "user": {
+          "name": "Alex Thompson",
+          "email": "alex.thompson@techcorp.com",
+          "role": "Sales Director",
+          "department": "Sales",
+          "company": "TechCorp Solutions"
+        },
+        "startTime": "2025-06-06T09:24:35.279Z",
+        "steps": [
+          {
+            "name": "Sales Dashboard Access",
+            "startTime": "2025-06-06T09:24:35.279Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:35.283Z",
+            "duration": 4
+          },
+          {
+            "name": "Submit Client Entertainment",
+            "startTime": "2025-06-06T09:24:35.799Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:35.803Z",
+            "duration": 4
+          },
+          {
+            "name": "Track Client Visit Mileage",
+            "startTime": "2025-06-06T09:24:36.313Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:36.317Z",
+            "duration": 4
+          },
+          {
+            "name": "Test Project/Client Allocation",
+            "startTime": "2025-06-06T09:24:36.831Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:36.834Z",
+            "duration": 3
+          },
+          {
+            "name": "Review Sales Team Expenses",
+            "startTime": "2025-06-06T09:24:37.345Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:37.350Z",
+            "duration": 5
+          },
+          {
+            "name": "Generate Client-Specific Reports",
+            "startTime": "2025-06-06T09:24:37.857Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:37.862Z",
+            "duration": 5
+          },
+          {
+            "name": "Track Billable Expenses",
+            "startTime": "2025-06-06T09:24:38.372Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:38.375Z",
+            "duration": 3
+          },
+          {
+            "name": "Commission Impact Analysis",
+            "startTime": "2025-06-06T09:24:38.876Z",
+            "status": "error",
+            "error": "",
+            "endTime": "2025-06-06T09:24:38.880Z",
+            "duration": 4
+          }
+        ],
+        "status": "completed",
+        "errors": [],
+        "endTime": "2025-06-06T09:24:39.384Z",
+        "duration": 4105
+      }
+    ],
+    "endTime": "2025-06-06T09:24:39.385Z",
+    "totalDuration": 34786
+  },
+  "summary": {
+    "totalScenarios": 5,
+    "passedScenarios": 5,
+    "failedScenarios": 0,
+    "successRate": "100.0%",
+    "totalDuration": "35s"
+  },
+  "detailedResults": [
+    {
+      "id": "SCENARIO_1",
+      "title": "Complete Employee Expense Submission & Approval Workflow",
+      "user": {
+        "name": "David Kim",
+        "email": "david.kim@techcorp.com",
+        "role": "Software Engineer",
+        "department": "Engineering",
+        "company": "TechCorp Solutions"
+      },
+      "startTime": "2025-06-06T09:24:04.602Z",
+      "steps": [
+        {
+          "name": "User Login",
+          "startTime": "2025-06-06T09:24:04.603Z",
+          "status": "error",
+          "error": "read ECONNRESET",
+          "endTime": "2025-06-06T09:24:09.730Z",
+          "duration": 5127
+        },
+        {
+          "name": "Navigate to Expenses Dashboard",
+          "startTime": "2025-06-06T09:24:10.233Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:10.238Z",
+          "duration": 5
+        },
+        {
+          "name": "Click New Expense Button",
+          "startTime": "2025-06-06T09:24:10.749Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:10.753Z",
+          "duration": 4
+        },
+        {
+          "name": "Upload Marriott Downtown Hotel Receipt",
+          "startTime": "2025-06-06T09:24:11.258Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:11.263Z",
+          "duration": 5
+        },
+        {
+          "name": "OCR Processing - Marriott Downtown Hotel",
+          "startTime": "2025-06-06T09:24:11.772Z",
+          "status": "passed",
+          "endTime": "2025-06-06T09:24:12.779Z",
+          "duration": 1007
+        },
+        {
+          "name": "Upload American Airlines Receipt",
+          "startTime": "2025-06-06T09:24:13.279Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:13.284Z",
+          "duration": 5
+        },
+        {
+          "name": "OCR Processing - American Airlines",
+          "startTime": "2025-06-06T09:24:13.789Z",
+          "status": "passed",
+          "endTime": "2025-06-06T09:24:14.802Z",
+          "duration": 1013
+        },
+        {
+          "name": "Upload The Capital Grille Receipt",
+          "startTime": "2025-06-06T09:24:15.301Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:15.306Z",
+          "duration": 5
+        },
+        {
+          "name": "OCR Processing - The Capital Grille",
+          "startTime": "2025-06-06T09:24:15.819Z",
+          "status": "passed",
+          "endTime": "2025-06-06T09:24:16.832Z",
+          "duration": 1013
+        },
+        {
+          "name": "Auto-Categorization Processing",
+          "startTime": "2025-06-06T09:24:17.342Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:17.346Z",
+          "duration": 4
+        },
+        {
+          "name": "Fill Expense Form",
+          "startTime": "2025-06-06T09:24:17.857Z",
+          "status": "passed",
+          "endTime": "2025-06-06T09:24:17.858Z",
+          "duration": 1
+        },
+        {
+          "name": "Submit for Approval",
+          "startTime": "2025-06-06T09:24:18.373Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:18.377Z",
+          "duration": 4
+        },
+        {
+          "name": "Check Expense Status",
+          "startTime": "2025-06-06T09:24:18.882Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:18.885Z",
+          "duration": 3
+        },
+        {
+          "name": "Test Notification System",
+          "startTime": "2025-06-06T09:24:19.390Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:19.394Z",
+          "duration": 4
+        }
+      ],
+      "status": "completed",
+      "errors": [],
+      "endTime": "2025-06-06T09:24:19.905Z",
+      "duration": 15303
+    },
+    {
+      "id": "SCENARIO_2",
+      "title": "Manager Approval & Budget Oversight Dashboard",
+      "user": {
+        "name": "Jennifer Smith",
+        "email": "jennifer.smith@techcorp.com",
+        "role": "Engineering Manager",
+        "department": "Engineering",
+        "company": "TechCorp Solutions"
+      },
+      "startTime": "2025-06-06T09:24:19.907Z",
+      "steps": [
+        {
+          "name": "Manager Dashboard Login",
+          "startTime": "2025-06-06T09:24:19.907Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:19.911Z",
+          "duration": 4
+        },
+        {
+          "name": "Navigate to Approvals",
+          "startTime": "2025-06-06T09:24:20.423Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:20.427Z",
+          "duration": 4
+        },
+        {
+          "name": "Review Pending Submissions",
+          "startTime": "2025-06-06T09:24:20.933Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:20.937Z",
+          "duration": 4
+        },
+        {
+          "name": "Test Approval Button",
+          "startTime": "2025-06-06T09:24:21.447Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:21.451Z",
+          "duration": 4
+        },
+        {
+          "name": "Test Rejection Button",
+          "startTime": "2025-06-06T09:24:21.959Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:21.963Z",
+          "duration": 4
+        },
+        {
+          "name": "Add Approval Comments",
+          "startTime": "2025-06-06T09:24:22.476Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:22.481Z",
+          "duration": 5
+        },
+        {
+          "name": "Check Budget Analytics",
+          "startTime": "2025-06-06T09:24:22.990Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:22.994Z",
+          "duration": 4
+        },
+        {
+          "name": "View Team Spending Reports",
+          "startTime": "2025-06-06T09:24:23.497Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:23.501Z",
+          "duration": 4
+        },
+        {
+          "name": "Export Approval Reports",
+          "startTime": "2025-06-06T09:24:24.002Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:24.005Z",
+          "duration": 3
+        }
+      ],
+      "status": "completed",
+      "errors": [],
+      "endTime": "2025-06-06T09:24:24.513Z",
+      "duration": 4606
+    },
+    {
+      "id": "SCENARIO_3",
+      "title": "CFO Executive Analytics & Financial Reporting",
+      "user": {
+        "name": "Robert Chen",
+        "email": "robert.chen@techcorp.com",
+        "role": "CFO",
+        "department": "Finance",
+        "company": "TechCorp Solutions"
+      },
+      "startTime": "2025-06-06T09:24:24.514Z",
+      "steps": [
+        {
+          "name": "CFO Executive Dashboard Access",
+          "startTime": "2025-06-06T09:24:24.514Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:24.518Z",
+          "duration": 4
+        },
+        {
+          "name": "View Company-wide Analytics",
+          "startTime": "2025-06-06T09:24:25.024Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:25.028Z",
+          "duration": 4
+        },
+        {
+          "name": "Test Spending by Category Chart",
+          "startTime": "2025-06-06T09:24:25.537Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:25.542Z",
+          "duration": 5
+        },
+        {
+          "name": "Test Monthly Trend Chart",
+          "startTime": "2025-06-06T09:24:26.049Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:26.053Z",
+          "duration": 4
+        },
+        {
+          "name": "Test Department Comparison Chart",
+          "startTime": "2025-06-06T09:24:26.562Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:26.566Z",
+          "duration": 4
+        },
+        {
+          "name": "Generate Monthly Financial Report",
+          "startTime": "2025-06-06T09:24:27.081Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:27.084Z",
+          "duration": 3
+        },
+        {
+          "name": "Analyze Department Spending",
+          "startTime": "2025-06-06T09:24:27.585Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:27.590Z",
+          "duration": 5
+        },
+        {
+          "name": "Review Compliance Metrics",
+          "startTime": "2025-06-06T09:24:28.102Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:28.105Z",
+          "duration": 3
+        },
+        {
+          "name": "Test Excel Export",
+          "startTime": "2025-06-06T09:24:28.620Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:28.623Z",
+          "duration": 3
+        },
+        {
+          "name": "Check Predictive Analytics",
+          "startTime": "2025-06-06T09:24:29.134Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:29.146Z",
+          "duration": 12
+        },
+        {
+          "name": "Verify Audit Trail",
+          "startTime": "2025-06-06T09:24:29.651Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:29.654Z",
+          "duration": 3
+        }
+      ],
+      "status": "completed",
+      "errors": [],
+      "endTime": "2025-06-06T09:24:30.157Z",
+      "duration": 5643
+    },
+    {
+      "id": "SCENARIO_4",
+      "title": "Accountant Document Processing & Reconciliation",
+      "user": {
+        "name": "Maria Rodriguez",
+        "email": "maria.rodriguez@techcorp.com",
+        "role": "Senior Accountant",
+        "department": "Finance",
+        "company": "TechCorp Solutions"
+      },
+      "startTime": "2025-06-06T09:24:30.158Z",
+      "steps": [
+        {
+          "name": "Accounting Interface Login",
+          "startTime": "2025-06-06T09:24:30.159Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:30.162Z",
+          "duration": 3
+        },
+        {
+          "name": "Navigate to Document Processing",
+          "startTime": "2025-06-06T09:24:30.675Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:30.680Z",
+          "duration": 5
+        },
+        {
+          "name": "Bulk Document Upload",
+          "startTime": "2025-06-06T09:24:31.191Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:31.195Z",
+          "duration": 4
+        },
+        {
+          "name": "OCR Batch Processing",
+          "startTime": "2025-06-06T09:24:31.697Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:31.703Z",
+          "duration": 6
+        },
+        {
+          "name": "Review Auto-categorization",
+          "startTime": "2025-06-06T09:24:32.212Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:32.215Z",
+          "duration": 3
+        },
+        {
+          "name": "Manual Categorization Corrections",
+          "startTime": "2025-06-06T09:24:32.725Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:32.729Z",
+          "duration": 4
+        },
+        {
+          "name": "Transaction Matching Workflow",
+          "startTime": "2025-06-06T09:24:33.240Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:33.243Z",
+          "duration": 3
+        },
+        {
+          "name": "Bank Statement Reconciliation",
+          "startTime": "2025-06-06T09:24:33.757Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:33.762Z",
+          "duration": 5
+        },
+        {
+          "name": "Generate Accounting Reports",
+          "startTime": "2025-06-06T09:24:34.263Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:34.266Z",
+          "duration": 3
+        },
+        {
+          "name": "Export to QuickBooks",
+          "startTime": "2025-06-06T09:24:34.773Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:34.776Z",
+          "duration": 3
+        }
+      ],
+      "status": "completed",
+      "errors": [],
+      "endTime": "2025-06-06T09:24:35.276Z",
+      "duration": 5118
+    },
+    {
+      "id": "SCENARIO_5",
+      "title": "Sales Team Travel & Entertainment Expenses",
+      "user": {
+        "name": "Alex Thompson",
+        "email": "alex.thompson@techcorp.com",
+        "role": "Sales Director",
+        "department": "Sales",
+        "company": "TechCorp Solutions"
+      },
+      "startTime": "2025-06-06T09:24:35.279Z",
+      "steps": [
+        {
+          "name": "Sales Dashboard Access",
+          "startTime": "2025-06-06T09:24:35.279Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:35.283Z",
+          "duration": 4
+        },
+        {
+          "name": "Submit Client Entertainment",
+          "startTime": "2025-06-06T09:24:35.799Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:35.803Z",
+          "duration": 4
+        },
+        {
+          "name": "Track Client Visit Mileage",
+          "startTime": "2025-06-06T09:24:36.313Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:36.317Z",
+          "duration": 4
+        },
+        {
+          "name": "Test Project/Client Allocation",
+          "startTime": "2025-06-06T09:24:36.831Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:36.834Z",
+          "duration": 3
+        },
+        {
+          "name": "Review Sales Team Expenses",
+          "startTime": "2025-06-06T09:24:37.345Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:37.350Z",
+          "duration": 5
+        },
+        {
+          "name": "Generate Client-Specific Reports",
+          "startTime": "2025-06-06T09:24:37.857Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:37.862Z",
+          "duration": 5
+        },
+        {
+          "name": "Track Billable Expenses",
+          "startTime": "2025-06-06T09:24:38.372Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:38.375Z",
+          "duration": 3
+        },
+        {
+          "name": "Commission Impact Analysis",
+          "startTime": "2025-06-06T09:24:38.876Z",
+          "status": "error",
+          "error": "",
+          "endTime": "2025-06-06T09:24:38.880Z",
+          "duration": 4
+        }
+      ],
+      "status": "completed",
+      "errors": [],
+      "endTime": "2025-06-06T09:24:39.384Z",
+      "duration": 4105
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "medium",
+      "type": "performance",
+      "description": "1 steps are running slowly (>3s)",
+      "steps": [
+        "User Login"
+      ]
+    },
+    {
+      "priority": "low",
+      "type": "enhancement",
+      "description": "Consider adding real-time notifications for approval status changes"
+    }
+  ]
+}

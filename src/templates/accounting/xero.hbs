@@ -1,0 +1,3 @@
+{{!-- Xero Bank Statement Import Template --}}
+*Date,*Amount,*Description,Reference,Code{{#each data}}
+{{formatDate transactionDate "DD/MM/YYYY"}},{{amount}},"{{description}}","{{#if receiptNumber}}{{receiptNumber}}{{else}}{{id}}{{/if}}","{{#if category.code}}{{category.code}}{{else}}200{{/if}}"{{/each}} 
