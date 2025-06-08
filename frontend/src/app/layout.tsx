@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { Providers } from '@/components/providers/Providers';
+// import { Providers } from '@/components/providers/Providers'; // TEMPORARILY DISABLED
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -17,11 +17,11 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:4000'),
   openGraph: {
     title: 'ExpenseFlow Pro - Modern Expense Management',
     description: 'Complete expense management solution for Polish businesses',
-    url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:4000',
     siteName: 'ExpenseFlow Pro',
     images: [
       {
@@ -55,15 +55,6 @@ export const metadata: Metadata = {
     google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
   },
   manifest: '/manifest.json',
-  icons: {
-    icon: [
-      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/apple-icon-180.png', sizes: '180x180', type: 'image/png' },
-    ],
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -87,17 +78,15 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#0ea5e9" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         
-        {/* Preload critical resources */}
-        <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        
         {/* DNS prefetch for external domains */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
       </head>
       <body className={`${inter.className} antialiased`}>
-        <Providers>
+        {/* TEMPORARILY REMOVED PROVIDERS TO TEST BASIC FUNCTIONALITY */}
+        {/* <Providers> */}
           {children}
-        </Providers>
+        {/* </Providers> */}
       </body>
     </html>
   );

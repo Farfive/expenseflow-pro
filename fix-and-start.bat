@@ -1,76 +1,81 @@
 @echo off
-title ExpenseFlow Pro - Quick Fix & Start
+title ExpenseFlow Pro - Fix and Start
 color 0A
+
 echo.
-echo 🚀 ExpenseFlow Pro - Quick Fix & Start
-echo ======================================
+echo ==========================================
+echo    EXPENSEFLOW PRO - FIX AND START
+echo ==========================================
 echo.
 
-echo 1. 🛠️ Fixing port conflicts...
-echo    Stopping all Node.js processes...
-taskkill /F /IM node.exe >nul 2>&1
-taskkill /F /IM npm.exe >nul 2>&1
-echo    ✅ Processes stopped
+REM Force kill all Node processes
+echo [1/6] Cleaning up all Node processes...
+taskkill /f /im node.exe >nul 2>&1
+taskkill /f /im npm.exe >nul 2>&1
 timeout /t 3 /nobreak >nul
 
-echo.
-echo 2. 🔧 Starting Backend Server...
-echo    URL: http://localhost:3002
-start /min cmd /c "title ExpenseFlow Backend && node working-server.js"
-echo    ✅ Backend starting...
+REM Clear any port conflicts
+echo [2/6] Clearing port conflicts...
+netsh interface portproxy delete v4tov4 listenport=3000 >nul 2>&1
+netsh interface portproxy delete v4tov4 listenport=4000 >nul 2>&1
+netsh interface portproxy delete v4tov4 listenport=4001 >nul 2>&1
 
-echo.
-echo 3. ⏳ Waiting for backend to initialize...
+REM Verify dependencies
+echo [3/6] Verifying dependencies...
+if not exist "node_modules" (
+    echo Installing backend dependencies...
+    npm install --silent
+)
+if not exist "frontend\node_modules" (
+    echo Installing frontend dependencies...
+    cd frontend
+    npm install --silent
+    cd ..
+)
+
+REM Start backend with explicit port
+echo [4/6] Starting backend server on port 4001...
+start "ExpenseFlow Backend" cmd /k "set PORT=4001 && set NODE_ENV=development && node simple-server.js"
+
+REM Wait for backend to fully start
+echo [5/6] Waiting for backend to initialize...
 timeout /t 8 /nobreak >nul
 
-echo.
-echo 4. 🌐 Starting Frontend Server...
-echo    URL: http://localhost:3000
+REM Verify backend is running
+curl -s http://localhost:4001/api/health >nul 2>&1
+if %errorlevel% neq 0 (
+    echo ERROR: Backend failed to start on port 4001
+    pause
+    exit /b 1
+)
+
+REM Start frontend with explicit port
+echo [6/6] Starting frontend server on port 4000...
 cd frontend
-start /min cmd /c "title ExpenseFlow Frontend && npm run dev"
-cd ..
-echo    ✅ Frontend starting...
+start "ExpenseFlow Frontend" cmd /k "set PORT=4000 && set NEXT_PUBLIC_API_URL=http://localhost:4001 && npm run dev"
 
-echo.
-echo 5. ⏳ Waiting for frontend to initialize...
+REM Wait and open browser
 timeout /t 10 /nobreak >nul
+start http://localhost:4000
 
 echo.
-echo 6. 🧪 Testing connections...
-echo    Testing backend...
-curl -s http://localhost:3002/api/health >nul 2>&1
-if %errorlevel% equ 0 (
-    echo    ✅ Backend responding
-) else (
-    echo    ⚠️ Backend may need more time
-)
-
-echo    Testing frontend...
-curl -s http://localhost:3000 >nul 2>&1
-if %errorlevel% equ 0 (
-    echo    ✅ Frontend responding
-) else (
-    echo    ⚠️ Frontend may need more time
-)
-
+echo ==========================================
+echo          STARTUP COMPLETE!
+echo ==========================================
 echo.
-echo ========================================
-echo 🎉 ExpenseFlow Pro is running!
-echo ========================================
+echo Backend:  http://localhost:4001/api/health
+echo Frontend: http://localhost:4000
 echo.
-echo 📱 Frontend: http://localhost:3000
-echo 🔧 Backend:  http://localhost:3002
-echo 💚 Health:   http://localhost:3002/api/health
+echo CONFIGURATION:
+echo - Backend runs on port 4001
+echo - Frontend runs on port 4000
+echo - API calls proxied from frontend to backend
+echo - CORS configured for cross-origin requests
 echo.
-echo 🔑 Test Users:
-echo    📧 Admin: test@expenseflow.com / password123
-echo    📧 Employee: david.kim@techcorp.com / test123
-echo    📧 Manager: jennifer.smith@techcorp.com / test123
+echo TROUBLESHOOTING:
+echo - If frontend shows connection errors, check backend logs
+echo - If ports are in use, run this script again
+echo - Use any email/password combination to login
 echo.
-echo 🌟 Opening frontend in browser...
-start http://localhost:3000
-echo.
-echo ✅ Ready! Check your browser for the frontend.
-echo ✅ Both servers are running in minimized windows.
-echo.
-pause 
+echo Press any key to close this window...
+pause >nul 

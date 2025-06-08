@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { LoginForm, RegisterForm, User, ApiResponse } from '@/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
 
 // Create axios instance
 const api = axios.create({
@@ -67,8 +67,8 @@ export const login = async (credentials: LoginForm): Promise<ApiResponse<{ user:
 };
 
 export const autoLogin = async (): Promise<ApiResponse<{ user: User; token: string; refreshToken: string }>> => {
-  const response = await api.post('/api/auth/auto-login');
-  return response.data;
+  // Auto-login removed - redirect to manual login
+  throw new Error('Auto-login disabled - please use manual login');
 };
 
 export const register = async (userData: RegisterForm): Promise<ApiResponse<{ user: User; token: string; refreshToken: string }>> => {

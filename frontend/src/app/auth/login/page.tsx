@@ -105,25 +105,25 @@ export default function LoginPage() {
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             {/* Email field */}
             <div>
-              <label htmlFor="email" className="form-label">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-900 dark:text-gray-100">
                 Email address
               </label>
               <input
                 {...register('email')}
                 type="email"
                 autoComplete="email"
-                className="form-input mt-1"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your email"
                 disabled={isSubmitting || loginLoading}
               />
               {errors.email && (
-                <p className="form-error mt-1">{errors.email.message}</p>
+                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
               )}
             </div>
 
             {/* Password field */}
             <div>
-              <label htmlFor="password" className="form-label">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-900 dark:text-gray-100">
                 Password
               </label>
               <div className="relative mt-1">
@@ -131,7 +131,7 @@ export default function LoginPage() {
                   {...register('password')}
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  className="form-input pr-10"
+                  className="block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter your password"
                   disabled={isSubmitting || loginLoading}
                 />
@@ -141,14 +141,14 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    <EyeOff className="h-4 w-4 text-gray-400" />
                   ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
+                    <Eye className="h-4 w-4 text-gray-400" />
                   )}
                 </button>
               </div>
               {errors.password && (
-                <p className="form-error mt-1">{errors.password.message}</p>
+                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
               )}
             </div>
 

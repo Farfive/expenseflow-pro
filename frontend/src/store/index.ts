@@ -1,7 +1,7 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
 import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
+import storage from './storage';
 
 // Import reducers
 import authReducer from './slices/authSlice';
@@ -36,12 +36,12 @@ const persistConfig = {
   blacklist: ['ui'], // Don't persist UI state
 };
 
-// Create persisted reducer
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+// Create persisted reducer (temporarily disabled for debugging)
+// const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 // Configure store
 export const store = configureStore({
-  reducer: persistedReducer,
+  reducer: rootReducer, // Use non-persisted reducer temporarily
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {

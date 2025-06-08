@@ -2,127 +2,102 @@
 
 ## ⚡ FASTEST WAY TO RUN THE APP
 
-### Option 1: Windows Batch Files (Recommended)
-1. **Double-click** `debug-start.bat`
-2. **Wait** for both servers to start
+### One Simple Step
+1. **Double-click** `run-app.bat`
+2. **Wait** for both servers to start (30-60 seconds)
 3. **Browser** will open automatically
 
-### Option 2: PowerShell Script  
-1. **Right-click** PowerShell as Administrator
-2. **Navigate** to project folder: `cd "C:\Users\nlaszanowski\OneDrive - DXC Production\Desktop\saas"`
-3. **Run**: `powershell -ExecutionPolicy Bypass -File start-app.ps1`
+That's it! No more separate backend/frontend startup.
 
-### Option 3: Manual Steps (If scripts fail)
-
-#### Step 1: Start Backend
-```bash
-# Open Command Prompt in project root
-node working-server.js
-```
-**Expected**: Backend runs on http://localhost:3002
-
-#### Step 2: Start Frontend (New Terminal Window)
-```bash
-# Open second Command Prompt
-cd frontend
-npm install     # Only needed first time
-npm run dev
-```
-**Expected**: Frontend runs on http://localhost:3000
-
-## 🌐 Test URLs to Open
+## 🌐 Application URLs
 
 | URL | Purpose |
 |-----|---------|
-| http://localhost:3000 | **Main App** (Should show content, not blank!) |
-| http://localhost:3000/test-simple | **Diagnostics Page** |
+| http://localhost:3000 | **Main Application** |
 | http://localhost:3002/api/health | **Backend Health Check** |
 
 ## ✅ What You Should See
 
-### 1. Backend Health (http://localhost:3002/api/health)
+### 1. Terminal Output
+```
+==========================================
+     EXPENSEFLOW PRO - UNIFIED STARTUP
+==========================================
+
+[1/5] Cleaning up existing processes...
+[2/5] Installing dependencies...
+[3/5] Starting unified application...
+
+Starting ExpenseFlow Pro...
+Backend will run on: http://localhost:3002
+Frontend will run on: http://localhost:3000
+```
+
+### 2. Backend Health (http://localhost:3002/api/health)
 ```json
 {
-  "status": "ok",
+  "status": "healthy",
   "timestamp": "2024-01-XX...",
   "uptime": "X seconds"
 }
 ```
 
-### 2. Frontend Main Page (http://localhost:3000)
+### 3. Frontend Main Page (http://localhost:3000)
 - ✅ **ExpenseFlow Pro** header
-- ✅ **Blue gradient background**
-- ✅ **"Modern Expense Management"** title
-- ✅ **Get started** button
-- ✅ **System Status** section at bottom
+- ✅ **Modern interface** with clean design
+- ✅ **Login functionality** (use any email/password)
 - ✅ **NO BLANK PAGE!**
-
-### 3. Test Page (http://localhost:3000/test-simple)
-- ✅ System diagnostics
-- ✅ Backend connection status
-- ✅ Environment information
 
 ## 🔧 Troubleshooting
 
+### Problem: Script Won't Start
+**Solution**:
+1. Install Node.js from https://nodejs.org
+2. Restart your computer
+3. Run `run-app.bat` as Administrator
+
 ### Problem: Blank Page on Frontend
-**Solution**: The simplified page should fix this. If still blank:
-1. Open browser **Developer Tools** (F12)
-2. Check **Console** tab for errors
-3. Try http://localhost:3000/test-simple instead
-
-### Problem: Backend Not Starting
 **Solution**:
-1. Check if Node.js is installed: `node --version`
-2. Kill existing processes: `taskkill /F /IM node.exe`
-3. Restart backend: `node working-server.js`
-
-### Problem: Frontend Not Starting  
-**Solution**:
-1. Check npm is available: `npm --version`
-2. Install dependencies: `cd frontend && npm install`
-3. Start dev server: `npm run dev`
+1. Wait 60 seconds for Next.js compilation
+2. Refresh the page (Ctrl+F5)
+3. Check browser console (F12) for errors
 
 ### Problem: Port Already in Use
 **Solution**:
 ```bash
-# Kill all Node processes
+# The script automatically kills existing processes
+# If it doesn't work, manually run:
 taskkill /F /IM node.exe
 taskkill /F /IM npm.exe
-# Then restart servers
 ```
 
-## 🎯 Expected Workflow After Startup
+## 🎯 Expected Workflow
 
-1. **Backend starts** on port 3002 ✅
-2. **Frontend starts** on port 3000 ✅
-3. **Browser opens** automatically ✅
-4. **Homepage loads** with content (not blank!) ✅
-5. **System status** shows backend connected ✅
+1. **Run script** → `run-app.bat` ✅
+2. **Both services start** in one terminal ✅
+3. **Wait for compilation** (30-60 seconds) ✅
+4. **Open browser** → http://localhost:3000 ✅
+5. **Use the application** ✅
 
-## 🔑 Test the Application
+## 🔑 Authentication
 
-Once both servers are running:
-
-1. **Visit**: http://localhost:3000
-2. **See**: Beautiful landing page with ExpenseFlow Pro content
-3. **Click**: "View test page" link
-4. **Test**: Backend connectivity in status section
-5. **Try**: Navigation and login links
+- **No auto-login** - use the login form
+- **Any email/password** works for demo
+- **Example**: email: `test@example.com`, password: `password`
 
 ## 📞 If Nothing Works
 
 1. **Check Node.js**: Download from https://nodejs.org
 2. **Restart Computer**: Sometimes helps with port conflicts
-3. **Check Antivirus**: May be blocking localhost connections
-4. **Manual Browser**: Open http://localhost:3000 manually
-5. **Check Firewall**: Allow Node.js through Windows Firewall
+3. **Run as Administrator**: Right-click `run-app.bat` → "Run as administrator"
+4. **Check Firewall**: Allow Node.js through Windows Firewall
 
 ## 🎉 Success Indicators
 
-- ✅ No error messages in terminals
-- ✅ Both URLs respond (3000 and 3002)
-- ✅ Frontend shows actual content
-- ✅ Backend health check returns JSON
-- ✅ System status shows "Backend connected"
+- ✅ One terminal window with both services
+- ✅ No error messages in terminal
+- ✅ http://localhost:3000 shows the application
+- ✅ http://localhost:3002/api/health returns JSON
+- ✅ Login form works with any credentials
 
 **You should now see a fully functional ExpenseFlow Pro application!** 🚀 

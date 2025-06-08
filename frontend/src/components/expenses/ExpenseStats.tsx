@@ -7,155 +7,135 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Receipt, 
-  Clock, 
-  CheckCircle, 
   DollarSign, 
   TrendingUp, 
-  Calendar 
+  Clock, 
+  CheckCircle,
+  AlertTriangle,
+  Calendar
 } from 'lucide-react';
 
-interface ExpenseStatsProps {
-  // Add any props if needed
-}
-
-interface StatsData {
+interface ExpenseStatsData {
   totalExpenses: number;
-  monthlyTotal: number;
-  pendingCount: number;
-  approvedCount: number;
-  averageAmount: number;
-  monthlyChange: number;
+  totalAmount: number;
+  pendingApproval: number;
+  approved: number;
+  rejected: number;
+  thisMonth: number;
+  lastMonth: number;
+  currency: string;
 }
 
-const ExpenseStats: React.FC<ExpenseStatsProps> = () => {
-  const [stats, setStats] = useState<StatsData>({
-    totalExpenses: 0,
-    monthlyTotal: 0,
-    pendingCount: 0,
-    approvedCount: 0,
-    averageAmount: 0,
-    monthlyChange: 0,
-  });
+export default function ExpenseStats() {
+  const [stats, setStats] = useState<ExpenseStatsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/expenses/stats');
+        const result = await response.json();
+        if (result.success) {
+          setStats(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching expense stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchStats();
   }, []);
 
-  const fetchStats = async () => {
-    try {
-      const response = await fetch('/api/expenses/stats');
-      const data = await response.json();
-      
-      if (data.success) {
-        setStats(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching expense stats:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('pl-PL', {
-      style: 'currency',
-      currency: 'PLN'
-    }).format(amount);
-  };
-
-  const statCards = [
-    {
-      title: 'Total Expenses',
-      value: formatCurrency(stats.totalExpenses),
-      icon: Receipt,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      change: null,
-    },
-    {
-      title: 'This Month',
-      value: formatCurrency(stats.monthlyTotal),
-      icon: Calendar,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      change: stats.monthlyChange,
-    },
-    {
-      title: 'Pending Approval',
-      value: stats.pendingCount.toString(),
-      icon: Clock,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50',
-      change: null,
-    },
-    {
-      title: 'Approved',
-      value: stats.approvedCount.toString(),
-      icon: CheckCircle,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      change: null,
-    },
-    {
-      title: 'Average Amount',
-      value: formatCurrency(stats.averageAmount),
-      icon: DollarSign,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      change: null,
-    },
-  ];
-
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="card p-4 animate-pulse">
-            <div className="h-4 bg-gray-200 rounded mb-2"></div>
-            <div className="h-6 bg-gray-200 rounded mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="bg-white p-6 rounded-lg shadow-sm border animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2"></div>
           </div>
         ))}
       </div>
     );
   }
 
+  if (!stats) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <p className="text-gray-500">Unable to load expense statistics</p>
+      </div>
+    );
+  }
+
+  const monthlyChange = stats.lastMonth > 0 
+    ? ((stats.thisMonth - stats.lastMonth) / stats.lastMonth) * 100 
+    : 0;
+
+  const statsCards = [
+    {
+      title: 'Total Expenses',
+      value: stats.totalExpenses.toString(),
+      icon: DollarSign,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100',
+      change: null
+    },
+    {
+      title: 'Total Amount',
+      value: `${stats.totalAmount.toLocaleString()} ${stats.currency}`,
+      icon: TrendingUp,
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
+      change: monthlyChange > 0 ? `+${monthlyChange.toFixed(1)}%` : `${monthlyChange.toFixed(1)}%`
+    },
+    {
+      title: 'Pending Approval',
+      value: stats.pendingApproval.toString(),
+      icon: Clock,
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-100',
+      change: null
+    },
+    {
+      title: 'Approved',
+      value: stats.approved.toString(),
+      icon: CheckCircle,
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
+      change: null
+    }
+  ];
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-      {statCards.map((card, index) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {statsCards.map((card, index) => (
         <motion.div
           key={card.title}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
-          className="card p-4"
+          className="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow"
         >
-          <div className="flex items-center justify-between mb-2">
-            <div className={`p-2 rounded-lg ${card.bgColor}`}>
-              <card.icon className={`w-5 h-5 ${card.color}`} />
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">{card.title}</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
+              {card.change && (
+                <p className={`text-sm mt-1 ${
+                  monthlyChange >= 0 ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {card.change} from last month
+                </p>
+              )}
             </div>
-            {card.change !== null && (
-              <div className={`flex items-center text-xs ${
-                card.change >= 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
-                <TrendingUp className={`w-3 h-3 mr-1 ${
-                  card.change < 0 ? 'transform rotate-180' : ''
-                }`} />
-                {Math.abs(card.change)}%
-              </div>
-            )}
-          </div>
-          
-          <div>
-            <p className="text-2xl font-bold text-gray-900">{card.value}</p>
-            <p className="text-sm text-gray-600">{card.title}</p>
+            <div className={`p-3 rounded-lg ${card.bgColor}`}>
+              <card.icon className={`w-6 h-6 ${card.color}`} />
+            </div>
           </div>
         </motion.div>
       ))}
     </div>
   );
-};
-
-export default ExpenseStats; 
+} 

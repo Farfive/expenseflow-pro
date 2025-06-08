@@ -11,121 +11,74 @@ import {
   Plus, 
   Upload, 
   Camera, 
-  FileText, 
-  History, 
-  Search,
-  Download,
-  Settings
+  FileText,
+  Scan,
+  Receipt
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-const QuickActions: React.FC = () => {
+export default function QuickActions() {
+  const router = useRouter();
+
   const actions = [
     {
       title: 'New Expense',
-      description: 'Submit a new expense report',
-      href: '/dashboard/expenses/new',
+      description: 'Create a new expense report',
       icon: Plus,
-      color: 'bg-blue-500 hover:bg-blue-600',
-      primary: true,
+      color: 'bg-blue-600 hover:bg-blue-700',
+      onClick: () => router.push('/dashboard/expenses/new')
     },
     {
       title: 'Upload Receipt',
-      description: 'Quick receipt upload',
-      href: '/dashboard/expenses/new?tab=upload',
+      description: 'Upload receipt or invoice',
       icon: Upload,
-      color: 'bg-green-500 hover:bg-green-600',
+      color: 'bg-green-600 hover:bg-green-700',
+      onClick: () => router.push('/dashboard/documents')
     },
     {
-      title: 'Take Photo',
-      description: 'Capture receipt with camera',
-      href: '/dashboard/expenses/new?tab=camera',
+      title: 'Scan Document',
+      description: 'Use camera to scan receipt',
       icon: Camera,
-      color: 'bg-purple-500 hover:bg-purple-600',
+      color: 'bg-purple-600 hover:bg-purple-700',
+      onClick: () => {
+        // TODO: Implement camera scanning
+        alert('Camera scanning coming soon!');
+      }
     },
     {
-      title: 'View Drafts',
-      description: 'Continue saved drafts',
-      href: '/dashboard/expenses/drafts',
+      title: 'Import Bank Statement',
+      description: 'Upload bank statement',
       icon: FileText,
-      color: 'bg-orange-500 hover:bg-orange-600',
-    },
-    {
-      title: 'History',
-      description: 'View expense history',
-      href: '/dashboard/expenses/history',
-      icon: History,
-      color: 'bg-gray-500 hover:bg-gray-600',
-    },
-    {
-      title: 'Search',
-      description: 'Find specific expenses',
-      href: '/dashboard/expenses/search',
-      icon: Search,
-      color: 'bg-indigo-500 hover:bg-indigo-600',
-    },
+      color: 'bg-orange-600 hover:bg-orange-700',
+      onClick: () => router.push('/dashboard/bank-statements')
+    }
   ];
 
   return (
-    <div className="card p-6">
+    <div className="bg-white rounded-lg shadow-sm border p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Quick Actions</h3>
-        <Link 
-          href="/dashboard/expenses/settings" 
-          className="text-gray-500 hover:text-gray-700"
-        >
-          <Settings className="w-5 h-5" />
-        </Link>
+        <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
+        <Receipt className="w-5 h-5 text-gray-400" />
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {actions.map((action, index) => (
-          <motion.div
+          <motion.button
             key={action.title}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
+            onClick={action.onClick}
+            className={`${action.color} text-white p-4 rounded-lg transition-colors group`}
           >
-            <Link
-              href={action.href}
-              className={`
-                block p-4 rounded-lg text-white text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg
-                ${action.color}
-                ${action.primary ? 'md:col-span-2 lg:col-span-2' : ''}
-              `}
-            >
-              <action.icon className={`w-6 h-6 mx-auto mb-2 ${action.primary ? 'w-8 h-8' : ''}`} />
-              <h4 className={`font-medium mb-1 ${action.primary ? 'text-lg' : 'text-sm'}`}>
-                {action.title}
-              </h4>
-              <p className={`text-xs opacity-90 ${action.primary ? 'text-sm' : ''}`}>
-                {action.description}
-              </p>
-            </Link>
-          </motion.div>
+            <div className="flex flex-col items-center text-center">
+              <action.icon className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" />
+              <h3 className="font-medium text-sm mb-1">{action.title}</h3>
+              <p className="text-xs opacity-90">{action.description}</p>
+            </div>
+          </motion.button>
         ))}
-      </div>
-      
-      {/* Additional Quick Stats */}
-      <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-blue-600">12</div>
-          <div className="text-xs text-gray-600">This Month</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-yellow-600">3</div>
-          <div className="text-xs text-gray-600">Pending</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-green-600">9</div>
-          <div className="text-xs text-gray-600">Approved</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-purple-600">2</div>
-          <div className="text-xs text-gray-600">Drafts</div>
-        </div>
       </div>
     </div>
   );
-};
-
-export default QuickActions; 
+} 

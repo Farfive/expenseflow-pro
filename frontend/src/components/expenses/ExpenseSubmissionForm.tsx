@@ -176,7 +176,14 @@ const ExpenseSubmissionForm: React.FC = () => {
 
     const handleOffline = () => {
       setIsOnline(false);
-      toast.info('Working offline - submissions will be queued');
+      toast('Working offline - submissions will be queued', {
+  icon: 'ℹ️',
+  style: {
+    background: '#dbeafe',
+    color: '#1e40af',
+    border: '1px solid #3b82f6'
+  }
+});
     };
 
     window.addEventListener('online', handleOnline);
@@ -280,9 +287,23 @@ const ExpenseSubmissionForm: React.FC = () => {
         
         // Handle OCR warnings or errors gracefully
         if (ocrData.error) {
-          toast.warning(`OCR processing: ${ocrData.error}`);
+          toast(`OCR processing: ${ocrData.error}`, {
+  icon: '⚠️',
+  style: {
+    background: '#fef3c7',
+    color: '#92400e',
+    border: '1px solid #fbbf24'
+  }
+});
         } else if (ocrData.warning) {
-          toast.info(`OCR warning: ${ocrData.warning}`);
+          toast(`OCR warning: ${ocrData.warning}`, {
+  icon: 'ℹ️',
+  style: {
+    background: '#dbeafe',
+    color: '#1e40af',
+    border: '1px solid #3b82f6'
+  }
+});
         }
         
         // 3. Extract and populate form data if OCR was successful
@@ -296,7 +317,14 @@ const ExpenseSubmissionForm: React.FC = () => {
           text: '',
           confidence: 0
         };
-        toast.warning(`OCR failed: ${ocrError.message || 'Please enter details manually'}`);
+        toast(`OCR failed: ${ocrError.message || 'Please enter details manually'}`, {
+  icon: '⚠️',
+  style: {
+    background: '#fef3c7',
+    color: '#92400e',
+    border: '1px solid #fbbf24'
+  }
+});
       }
 
       // 4. Update file status (always mark as completed even if OCR failed)

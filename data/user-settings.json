@@ -1,0 +1,39 @@
+{
+  "profile": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@company.com",
+    "phone": "+48 123 456 789",
+    "position": "Senior Accountant",
+    "department": "Finance",
+    "avatar": ""
+  },
+  "preferences": {
+    "language": "en",
+    "timezone": "Europe/Warsaw",
+    "currency": "PLN",
+    "dateFormat": "DD/MM/YYYY",
+    "numberFormat": "european",
+    "theme": "light"
+  },
+  "notifications": {
+    "email": true,
+    "push": true,
+    "sms": false,
+    "expenseApproved": true,
+    "expenseRejected": true,
+    "documentProcessed": true,
+    "reportReady": true,
+    "weeklyDigest": true
+  },
+  "dashboard": {
+    "widgets": [
+      "stats",
+      "recent-expenses",
+      "pending-approvals",
+      "quick-actions"
+    ],
+    "defaultTimeRange": "last_30_days",
+    "showWelcome": true
+  }
+}

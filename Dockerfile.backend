@@ -1,0 +1,17 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files (if any)
+COPY package*.json ./
+
+# Install dependencies if package.json exists
+RUN if [ -f package.json ]; then npm install; fi
+
+# Copy backend source
+COPY simple-server.js ./
+COPY *.js ./
+
+EXPOSE 3002
+
+CMD ["node", "simple-server.js"] 

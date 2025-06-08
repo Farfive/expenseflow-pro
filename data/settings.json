@@ -1,0 +1,83 @@
+{
+  "company": {
+    "name": "ExpenseFlow Demo Corp",
+    "address": "ul. Marszałkowska 123",
+    "city": "Warsaw",
+    "country": "Poland",
+    "postalCode": "00-001",
+    "taxId": "1234567890",
+    "currency": "PLN",
+    "fiscalYearStart": "01-01",
+    "accountingMethod": "accrual",
+    "timezone": "Europe/Warsaw",
+    "language": "en",
+    "dateFormat": "DD/MM/YYYY",
+    "numberFormat": "european"
+  },
+  "approval": {
+    "defaultWorkflow": "standard",
+    "autoApproveLimit": 500,
+    "requireReceiptAbove": 100,
+    "allowSelfApproval": false,
+    "escalationDays": 3,
+    "reminderDays": 1
+  },
+  "notifications": {
+    "emailEnabled": true,
+    "pushEnabled": true,
+    "smsEnabled": false,
+    "approvalReminders": true,
+    "expenseSubmitted": true,
+    "documentProcessed": true,
+    "reportGenerated": true
+  },
+  "integrations": {
+    "bankApi": {
+      "enabled": false,
+      "provider": null,
+      "apiKey": null,
+      "lastSync": null
+    },
+    "accounting": {
+      "enabled": false,
+      "provider": null,
+      "apiKey": null,
+      "lastSync": null
+    },
+    "ocr": {
+      "enabled": true,
+      "provider": "tesseract",
+      "confidence": 0.7,
+      "autoProcess": true
+    },
+    "email": {
+      "enabled": false,
+      "provider": "smtp",
+      "host": "",
+      "port": 587,
+      "username": "",
+      "password": "",
+      "fromAddress": ""
+    }
+  },
+  "security": {
+    "sessionTimeout": 480,
+    "passwordPolicy": {
+      "minLength": 8,
+      "requireUppercase": true,
+      "requireLowercase": true,
+      "requireNumbers": true,
+      "requireSpecialChars": false
+    },
+    "twoFactorAuth": false,
+    "auditLogging": true,
+    "ipRestrictions": []
+  },
+  "ui": {
+    "theme": "light",
+    "sidebarCollapsed": false,
+    "itemsPerPage": 25,
+    "defaultView": "list",
+    "showTutorials": true
+  }
+}

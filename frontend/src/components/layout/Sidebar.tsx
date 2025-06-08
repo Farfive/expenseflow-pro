@@ -20,7 +20,8 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronRight,
-  Building2
+  Building2,
+  Plug
 } from 'lucide-react';
 import { RootState } from '@/store';
 import { UserRole, Permission } from '@/types';
@@ -167,15 +168,20 @@ const menuItems: MenuItem[] = [
     icon: Settings,
     children: [
       {
+        name: 'General Settings',
+        href: '/dashboard/settings',
+        icon: Settings,
+      },
+      {
         name: 'Company Settings',
         href: '/dashboard/settings/company',
-        icon: Settings,
+        icon: Building2,
         permissions: [Permission.VIEW_COMPANY_SETTINGS],
       },
       {
         name: 'Integrations',
         href: '/dashboard/settings/integrations',
-        icon: Settings,
+        icon: Plug,
         permissions: [Permission.MANAGE_COMPANY],
       },
     ],
@@ -183,6 +189,11 @@ const menuItems: MenuItem[] = [
 ];
 
 const helpItems: MenuItem[] = [
+  {
+    name: 'Profile',
+    href: '/dashboard/profile',
+    icon: Users,
+  },
   {
     name: 'Help Center',
     href: '/help',

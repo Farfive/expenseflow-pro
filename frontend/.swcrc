@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true,
+      "decorators": true,
+      "dynamicImport": true
+    },
+    "transform": {
+      "react": {
+        "runtime": "automatic",
+        "pragma": "React.createElement",
+        "pragmaFrag": "React.Fragment",
+        "throwIfNamespace": true,
+        "development": true,
+        "useBuiltins": true,
+        "refresh": true
+      },
+      "optimizer": {
+        "globals": {
+          "vars": {
+            "__DEV__": "true",
+            "process.env.NODE_ENV": "\"development\""
+          }
+        }
+      }
+    },
+    "target": "es2020",
+    "loose": true,
+    "externalHelpers": false,
+    "keepClassNames": true,
+    "preserveAllComments": false
+  },
+  "module": {
+    "type": "es6",
+    "strict": false,
+    "strictMode": true,
+    "lazy": false,
+    "noInterop": false
+  },
+  "minify": false,
+  "sourceMaps": true,
+  "inlineSourcesContent": true,
+  "env": {
+    "targets": {
+      "chrome": "90",
+      "firefox": "88",
+      "safari": "14",
+      "edge": "90"
+    },
+    "mode": "usage",
+    "coreJs": "3.22"
+  },
+  "exclude": [
+    "node_modules",
+    ".next",
+    "dist",
+    "build"
+  ]
+} 

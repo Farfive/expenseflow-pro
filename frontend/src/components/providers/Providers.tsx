@@ -10,7 +10,7 @@ import { Toaster } from 'react-hot-toast';
 import { store, persistor } from '@/store';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
-import { AutoLoginProvider } from './AutoLoginProvider';
+
 
 // Create a client
 const queryClient = new QueryClient({
@@ -46,7 +46,11 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <ErrorBoundary>
       <ReduxProvider store={store}>
-        <PersistGate loading={<LoadingScreen />} persistor={persistor}>
+        {/* TEMPORARILY DISABLED PERSISTGATE FOR INSTANT LOADING */}
+        {/* <PersistGate 
+          loading={<LoadingScreen />} 
+          persistor={persistor}
+        > */}
           <QueryClientProvider client={queryClient}>
             <ThemeProvider
               attribute="class"
@@ -54,9 +58,7 @@ export function Providers({ children }: ProvidersProps) {
               enableSystem
               disableTransitionOnChange
             >
-              <AutoLoginProvider>
-                {children}
-              </AutoLoginProvider>
+              {children}
               
               {/* Toast notifications */}
               <Toaster
@@ -92,7 +94,7 @@ export function Providers({ children }: ProvidersProps) {
               )}
             </ThemeProvider>
           </QueryClientProvider>
-        </PersistGate>
+        {/* </PersistGate> */}
       </ReduxProvider>
     </ErrorBoundary>
   );
